@@ -1,0 +1,1139 @@
+
+
+<!DOCTYPE html>
+
+<html lang="de">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Vogel-Reise-Tracker</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+
+        }
+
+
+        body {
+
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+            min-height: 100vh;
+
+            padding: 20px;
+
+        }
+
+
+        .container {
+
+            max-width: 1400px;
+
+            margin: 0 auto;
+
+            background: white;
+
+            border-radius: 20px;
+
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+
+            overflow: hidden;
+
+        }
+
+
+        .header {
+
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+            color: white;
+
+            padding: 30px;
+
+            text-align: center;
+
+        }
+
+
+        .header h1 {
+
+            font-size: 2.5em;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        .tabs {
+
+            display: flex;
+
+            background: #f5f5f5;
+
+            border-bottom: 2px solid #ddd;
+
+        }
+
+
+        .tab {
+
+            flex: 1;
+
+            padding: 20px;
+
+            text-align: center;
+
+            cursor: pointer;
+
+            background: #f5f5f5;
+
+            border: none;
+
+            font-size: 1.1em;
+
+            font-weight: 600;
+
+            transition: all 0.3s;
+
+        }
+
+
+        .tab:hover {
+
+            background: #e0e0e0;
+
+        }
+
+
+        .tab.active {
+
+            background: white;
+
+            color: #667eea;
+
+            border-bottom: 3px solid #667eea;
+
+        }
+
+
+        .content {
+
+            padding: 30px;
+
+        }
+
+
+        .tab-content {
+
+            display: none;
+
+        }
+
+
+        .tab-content.active {
+
+            display: block;
+
+        }
+
+
+        .form-group {
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .form-group label {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-weight: 600;
+
+            color: #333;
+
+        }
+
+
+        .form-group input[type="text"],
+
+        .form-group input[type="number"],
+
+        .form-group select,
+
+        .form-group textarea {
+
+            width: 100%;
+
+            padding: 12px;
+
+            border: 2px solid #ddd;
+
+            border-radius: 8px;
+
+            font-size: 1em;
+
+            transition: border 0.3s;
+
+        }
+
+
+        .form-group input:focus,
+
+        .form-group select:focus,
+
+        .form-group textarea:focus {
+
+            outline: none;
+
+            border-color: #667eea;
+
+        }
+
+
+        .file-upload {
+
+            border: 3px dashed #ddd;
+
+            border-radius: 8px;
+
+            padding: 30px;
+
+            text-align: center;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+        }
+
+
+        .file-upload:hover {
+
+            border-color: #667eea;
+
+            background: #f9f9f9;
+
+        }
+
+
+        .file-upload input {
+
+            display: none;
+
+        }
+
+
+        .preview-image {
+
+            max-width: 300px;
+
+            max-height: 300px;
+
+            margin-top: 15px;
+
+            border-radius: 8px;
+
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+        }
+
+
+        .btn {
+
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+            color: white;
+
+            padding: 15px 40px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            font-size: 1.1em;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition: transform 0.2s;
+
+        }
+
+
+        .btn:hover {
+
+            transform: translateY(-2px);
+
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+
+        }
+
+
+        .bird-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+
+            gap: 25px;
+
+            margin-top: 20px;
+
+        }
+
+
+        .bird-card {
+
+            background: white;
+
+            border-radius: 12px;
+
+            overflow: hidden;
+
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+            transition: transform 0.3s;
+
+            cursor: pointer;
+
+        }
+
+
+        .bird-card:hover {
+
+            transform: translateY(-5px);
+
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+
+        }
+
+
+        .bird-card img {
+
+            width: 100%;
+
+            height: 200px;
+
+            object-fit: cover;
+
+        }
+
+
+        .bird-card-content {
+
+            padding: 15px;
+
+        }
+
+
+        .bird-card h3 {
+
+            color: #667eea;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        .bird-card p {
+
+            color: #666;
+
+            margin: 5px 0;
+
+            font-size: 0.9em;
+
+        }
+
+
+        .delete-btn {
+
+            background: #e74c3c;
+
+            color: white;
+
+            border: none;
+
+            padding: 8px 15px;
+
+            border-radius: 5px;
+
+            cursor: pointer;
+
+            margin-top: 10px;
+
+            font-size: 0.9em;
+
+        }
+
+
+        .delete-btn:hover {
+
+            background: #c0392b;
+
+        }
+
+
+        #map {
+
+            height: 600px;
+
+            border-radius: 12px;
+
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+        }
+
+
+        .stats {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+            gap: 20px;
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .stat-card {
+
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+            color: white;
+
+            padding: 25px;
+
+            border-radius: 12px;
+
+            text-align: center;
+
+        }
+
+
+        .stat-card h3 {
+
+            font-size: 2.5em;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .stat-card p {
+
+            opacity: 0.9;
+
+        }
+
+
+        .loading {
+
+            display: none;
+
+            text-align: center;
+
+            padding: 20px;
+
+            color: #667eea;
+
+        }
+
+
+        .location-coords {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 15px;
+
+        }
+
+
+        .modal {
+
+            display: none;
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            bottom: 0;
+
+            background: rgba(0,0,0,0.8);
+
+            z-index: 1000;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+
+        }
+
+
+        .modal.active {
+
+            display: flex;
+
+        }
+
+
+        .modal-content {
+
+            background: white;
+
+            border-radius: 12px;
+
+            max-width: 800px;
+
+            max-height: 90vh;
+
+            overflow-y: auto;
+
+            padding: 30px;
+
+            position: relative;
+
+        }
+
+
+        .modal-close {
+
+            position: absolute;
+
+            top: 15px;
+
+            right: 15px;
+
+            background: #e74c3c;
+
+            color: white;
+
+            border: none;
+
+            width: 35px;
+
+            height: 35px;
+
+            border-radius: 50%;
+
+            cursor: pointer;
+
+            font-size: 1.2em;
+
+        }
+
+
+        .modal-image {
+
+            width: 100%;
+
+            max-height: 400px;
+
+            object-fit: contain;
+
+            border-radius: 8px;
+
+            margin-bottom: 20px;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+
+            <h1>🦅 Vogel-Reise-Tracker</h1>
+
+            <p>Dokumentiere deine Vogel-Entdeckungen auf der ganzen Welt</p>
+
+        </div>
+
+
+        <div class="tabs">
+
+            <button class="tab active" data-tab="add">Vogel hinzufügen</button>
+
+            <button class="tab" data-tab="list">Meine Vögel</button>
+
+            <button class="tab" data-tab="map">Weltkarte</button>
+
+        </div>
+
+
+        <div class="content">
+
+            <!-- Tab: Vogel hinzufügen -->
+
+            <div class="tab-content active" id="add">
+
+                <h2>Neuen Vogel dokumentieren</h2>
+
+                <form id="birdForm">
+
+                    <div class="form-group">
+
+                        <label>Vogelname *</label>
+
+                        <input type="text" id="birdName" required placeholder="z.B. Rotkehlchen">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Foto hochladen *</label>
+
+                        <div class="file-upload" onclick="document.getElementById('photoInput').click()">
+
+                            <input type="file" id="photoInput" accept="image/*" required>
+
+                            <p>📸 Klicken zum Hochladen</p>
+
+                            <img id="photoPreview" class="preview-image" style="display: none;">
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Standort *</label>
+
+                        <input type="text" id="locationName" required placeholder="z.B. Schwarzwald, Deutschland">
+
+                    </div>
+
+
+                    <div class="location-coords">
+
+                        <div class="form-group">
+
+                            <label>Breitengrad *</label>
+
+                            <input type="number" id="latitude" step="0.0001" required placeholder="z.B. 48.1351">
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Längengrad *</label>
+
+                            <input type="number" id="longitude" step="0.0001" required placeholder="z.B. 11.5820">
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Notizen (optional)</label>
+
+                        <textarea id="notes" rows="3" placeholder="Besondere Beobachtungen..."></textarea>
+
+                    </div>
+
+
+                    <div class="loading" id="loading">
+
+                        <p>🔍 Lade zusätzliche Informationen...</p>
+
+                    </div>
+
+
+                    <button type="submit" class="btn">Vogel speichern</button>
+
+                </form>
+
+            </div>
+
+
+            <!-- Tab: Meine Vögel -->
+
+            <div class="tab-content" id="list">
+
+                <div class="stats" id="stats"></div>
+
+                <h2>Meine Vogel-Sammlung</h2>
+
+                <div class="bird-grid" id="birdGrid"></div>
+
+            </div>
+
+
+            <!-- Tab: Weltkarte -->
+
+            <div class="tab-content" id="map-tab">
+
+                <h2>Weltweite Vogel-Entdeckungen</h2>
+
+                <div id="map"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Modal für Details -->
+
+    <div class="modal" id="birdModal">
+
+        <div class="modal-content">
+
+            <button class="modal-close" onclick="closeModal()">×</button>
+
+            <div id="modalContent"></div>
+
+        </div>
+
+    </div>
+
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+
+        let birds = [];
+
+        let map = null;
+
+
+        // Daten aus localStorage laden
+
+        function loadBirds() {
+
+            const stored = localStorage.getItem('birdTracker');
+
+            if (stored) {
+
+                birds = JSON.parse(stored);
+
+            }
+
+        }
+
+
+        // Daten in localStorage speichern
+
+        function saveBirds() {
+
+            localStorage.setItem('birdTracker', JSON.stringify(birds));
+
+        }
+
+
+        // Tab-Wechsel
+
+        document.querySelectorAll('.tab').forEach(tab => {
+
+            tab.addEventListener('click', () => {
+
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                
+
+                tab.classList.add('active');
+
+                const tabId = tab.dataset.tab === 'map' ? 'map-tab' : tab.dataset.tab;
+
+                document.getElementById(tabId).classList.add('active');
+
+                
+
+                if (tab.dataset.tab === 'list') {
+
+                    displayBirds();
+
+                } else if (tab.dataset.tab === 'map') {
+
+                    initMap();
+
+                }
+
+            });
+
+        });
+
+
+        // Foto-Vorschau
+
+        document.getElementById('photoInput').addEventListener('change', (e) => {
+
+            const file = e.target.files[0];
+
+            if (file) {
+
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+
+                    const preview = document.getElementById('photoPreview');
+
+                    preview.src = e.target.result;
+
+                    preview.style.display = 'block';
+
+                };
+
+                reader.readAsDataURL(file);
+
+            }
+
+        });
+
+
+        // Formular absenden
+
+        document.getElementById('birdForm').addEventListener('submit', async (e) => {
+
+            e.preventDefault();
+
+            
+
+            const loading = document.getElementById('loading');
+
+            loading.style.display = 'block';
+
+            
+
+            const name = document.getElementById('birdName').value;
+
+            const locationName = document.getElementById('locationName').value;
+
+            const latitude = parseFloat(document.getElementById('latitude').value);
+
+            const longitude = parseFloat(document.getElementById('longitude').value);
+
+            const notes = document.getElementById('notes').value;
+
+            const photoFile = document.getElementById('photoInput').files[0];
+
+            
+
+            // Foto als Base64 speichern
+
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+
+                const photoData = e.target.result;
+
+                
+
+                // Zusätzliche Infos abrufen (simuliert, da API-Zugriff im Browser begrenzt)
+
+                const additionalInfo = await fetchBirdInfo(name);
+
+                
+
+                const bird = {
+
+                    id: Date.now(),
+
+                    name,
+
+                    locationName,
+
+                    latitude,
+
+                    longitude,
+
+                    notes,
+
+                    photo: photoData,
+
+                    date: new Date().toLocaleDateString('de-DE'),
+
+                    ...additionalInfo
+
+                };
+
+                
+
+                birds.push(bird);
+
+                saveBirds();
+
+                
+
+                loading.style.display = 'none';
+
+                alert('🎉 Vogel erfolgreich gespeichert!');
+
+                document.getElementById('birdForm').reset();
+
+                document.getElementById('photoPreview').style.display = 'none';
+
+            };
+
+            
+
+            reader.readAsDataURL(photoFile);
+
+        });
+
+
+        // Vogel-Informationen abrufen (vereinfacht)
+
+        async function fetchBirdInfo(name) {
+
+            // Simuliere API-Aufruf mit Beispieldaten
+
+            const families = ['Singvögel', 'Greifvögel', 'Wasservögel', 'Rabenvögel', 'Papageien'];
+
+            const habitats = ['Wälder', 'Gewässer', 'Gebirge', 'Felder', 'Städte'];
+
+            
+
+            return {
+
+                family: families[Math.floor(Math.random() * families.length)],
+
+                habitat: habitats[Math.floor(Math.random() * habitats.length)],
+
+                description: `Ein wunderschöner Vogel aus der Familie der ${families[0]}.`
+
+            };
+
+        }
+
+
+        // Vögel anzeigen
+
+        function displayBirds() {
+
+            const grid = document.getElementById('birdGrid');
+
+            const stats = document.getElementById('stats');
+
+            
+
+            // Statistiken
+
+            const countries = [...new Set(birds.map(b => b.locationName.split(',').pop().trim()))];
+
+            stats.innerHTML = `
+
+                <div class="stat-card">
+
+                    <h3>${birds.length}</h3>
+
+                    <p>Vögel entdeckt</p>
+
+                </div>
+
+                <div class="stat-card">
+
+                    <h3>${countries.length}</h3>
+
+                    <p>Länder bereist</p>
+
+                </div>
+
+                <div class="stat-card">
+
+                    <h3>${new Set(birds.map(b => b.family)).size}</h3>
+
+                    <p>Vogelfamilien</p>
+
+                </div>
+
+            `;
+
+            
+
+            // Vögel-Grid
+
+            grid.innerHTML = birds.map(bird => `
+
+                <div class="bird-card" onclick="showBirdDetails(${bird.id})">
+
+                    <img src="${bird.photo}" alt="${bird.name}">
+
+                    <div class="bird-card-content">
+
+                        <h3>${bird.name}</h3>
+
+                        <p>📍 ${bird.locationName}</p>
+
+                        <p>📅 ${bird.date}</p>
+
+                        <p>🏛️ ${bird.family}</p>
+
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteBird(${bird.id})">Löschen</button>
+
+                    </div>
+
+                </div>
+
+            `).join('');
+
+        }
+
+
+        // Vogel-Details anzeigen
+
+        function showBirdDetails(id) {
+
+            const bird = birds.find(b => b.id === id);
+
+            const modal = document.getElementById('birdModal');
+
+            const content = document.getElementById('modalContent');
+
+            
+
+            content.innerHTML = `
+
+                <img src="${bird.photo}" class="modal-image" alt="${bird.name}">
+
+                <h2>${bird.name}</h2>
+
+                <p><strong>Familie:</strong> ${bird.family}</p>
+
+                <p><strong>Lebensraum:</strong> ${bird.habitat}</p>
+
+                <p><strong>Standort:</strong> ${bird.locationName}</p>
+
+                <p><strong>Koordinaten:</strong> ${bird.latitude}, ${bird.longitude}</p>
+
+                <p><strong>Datum:</strong> ${bird.date}</p>
+
+                ${bird.notes ? `<p><strong>Notizen:</strong> ${bird.notes}</p>` : ''}
+
+                <p><strong>Beschreibung:</strong> ${bird.description}</p>
+
+            `;
+
+            
+
+            modal.classList.add('active');
+
+        }
+
+
+        function closeModal() {
+
+            document.getElementById('birdModal').classList.remove('active');
+
+        }
+
+
+        // Vogel löschen
+
+        function deleteBird(id) {
+
+            if (confirm('Möchtest du diesen Vogel wirklich löschen?')) {
+
+                birds = birds.filter(b => b.id !== id);
+
+                saveBirds();
+
+                displayBirds();
+
+            }
+
+        }
+
+
+        // Karte initialisieren
+
+        function initMap() {
+
+            if (map) {
+
+                map.remove();
+
+            }
+
+            
+
+            map = L.map('map').setView([20, 0], 2);
+
+            
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+                attribution: '© OpenStreetMap contributors'
+
+            }).addTo(map);
+
+            
+
+            // Marker für jeden Vogel
+
+            birds.forEach(bird => {
+
+                const marker = L.marker([bird.latitude, bird.longitude]).addTo(map);
+
+                marker.bindPopup(`
+
+                    <div style="text-align: center;">
+
+                        <img src="${bird.photo}" style="width: 150px; height: 100px; object-fit: cover; border-radius: 5px; margin-bottom: 10px;">
+
+                        <h3 style="margin: 5px 0;">${bird.name}</h3>
+
+                        <p style="margin: 3px 0;">${bird.locationName}</p>
+
+                        <p style="margin: 3px 0;">${bird.date}</p>
+
+                    </div>
+
+                `);
+
+            });
+
+        }
+
+
+        // Initial laden
+
+        loadBirds();
+
+        displayBirds();
+
+    </script>
+
+</body>
+
+</html>
