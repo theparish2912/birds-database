@@ -123,6 +123,33 @@
             background: #f0f0f0;
         }
 
+        .photo-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .photo-option-btn {
+            padding: 40px 20px;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            background: white;
+            color: #667eea;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .photo-option-btn:active {
+            transform: scale(0.98);
+            background: #f0f4ff;
+        }
+
         .photo-input {
             display: none;
         }
@@ -479,18 +506,29 @@
         <div class="tab-content active" id="add">
             <form id="birdForm">
                 <div class="form-group">
-                    <label>Foto aufnehmen *</label>
-                    <button type="button" class="camera-btn" onclick="document.getElementById('photoInput').click()">
-                        <span style="font-size: 3em;">📸</span>
-                        <span>Tippen zum Fotografieren</span>
-                    </button>
-                    <input type="file" id="photoInput" class="photo-input" accept="image/*" capture="environment" required>
+                    <label>Foto hinzufügen *</label>
+                    <div class="photo-options">
+                        <button type="button" class="photo-option-btn" onclick="openCamera()">
+                            <span style="font-size: 2.5em;">📸</span>
+                            <span>Foto aufnehmen</span>
+                        </button>
+                        <button type="button" class="photo-option-btn" onclick="openGallery()">
+                            <span style="font-size: 2.5em;">🖼️</span>
+                            <span>Galerie</span>
+                        </button>
+                    </div>
+                    <input type="file" id="photoInput" class="photo-input" accept="image/*" required>
                     <img id="photoPreview" class="photo-preview">
                 </div>
 
                 <div class="form-group">
                     <label>Vogelname *</label>
                     <input type="text" id="birdName" required placeholder="z.B. Rotkehlchen">
+                </div>
+
+                <div class="form-group">
+                    <label>Aufnahmedatum *</label>
+                    <input type="date" id="birdDate" required>
                 </div>
 
                 <div class="form-group">
@@ -699,11 +737,26 @@
             }
         });
 
+        // Kamera öffnen
+        function openCamera() {
+            const input = document.getElementById('photoInput');
+            input.setAttribute('capture', 'environment');
+            input.click();
+        }
+
+        // Galerie öffnen
+        function openGallery() {
+            const input = document.getElementById('photoInput');
+            input.removeAttribute('capture');
+            input.click();
+        }
+
         // Formular absenden
         document.getElementById('birdForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const name = document.getElementById('birdName').value;
+            const birdDate = document.getElementById('birdDate').value;
             const country = document.getElementById('countrySelect').value;
             const locationDetails = document.getElementById('locationDetails').value;
             const notes = document.getElementById('notes').value;
@@ -716,6 +769,10 @@
                 const countryData = countries[country];
                 const location = locationDetails ? `${locationDetails}, ${country}` : country;
                 
+                // Datum formatieren
+                const dateObj = new Date(birdDate);
+                const formattedDate = dateObj.toLocaleDateString('de-DE');
+                
                 const bird = {
                     id: Date.now(),
                     name,
@@ -727,7 +784,8 @@
                     longitude: countryData.coords[1],
                     notes,
                     photo: photoData,
-                    date: new Date().toLocaleDateString('de-DE'),
+                    date: formattedDate,
+                    dateRaw: birdDate,
                     time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
                 };
                 
@@ -940,6 +998,9 @@
         populateCountries();
         loadBirds();
         displayBirds();
+        
+        // Heutiges Datum als Standard setzen
+        document.getElementById('birdDate').valueAsDate = new Date();
     </script>
 </body>
 </html>
