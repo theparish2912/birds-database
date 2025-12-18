@@ -31,6 +31,13 @@
             top: 0;
             z-index: 100;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-header-content {
+            flex: 1;
         }
 
         .app-header h1 {
@@ -44,6 +51,27 @@
             font-size: 0.85em;
             opacity: 0.9;
             margin-top: 5px;
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .refresh-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(180deg);
         }
 
         .content {
@@ -424,6 +452,62 @@
             opacity: 1;
         }
 
+        .success-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-overlay.show {
+            display: flex;
+        }
+
+        .success-message {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 300px;
+            animation: successPop 0.4s ease-out;
+        }
+
+        @keyframes successPop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .success-message h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .success-message p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
         .country-flag {
             font-size: 1.3em;
             margin-right: 5px;
@@ -497,8 +581,13 @@
 </head>
 <body>
     <div class="app-header">
-        <h1>🦅 Vogel-Tracker</h1>
-        <p>Dokumentiere deine Entdeckungen weltweit</p>
+        <div class="app-header-content">
+            <h1>🦅 Vogel-Tracker</h1>
+            <p>Dokumentiere deine Entdeckungen weltweit</p>
+        </div>
+        <button class="refresh-btn" onclick="refreshApp()" title="Seite aktualisieren">
+            🔄
+        </button>
     </div>
 
     <div class="content">
@@ -614,6 +703,15 @@
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
+
+    <!-- Success Overlay -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-message">
+            <div class="success-icon">✅</div>
+            <h3>Erfolgreich gespeichert!</h3>
+            <p>Dein Vogel wurde hinzugefügt</p>
+        </div>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
@@ -792,13 +890,37 @@
                 birds.unshift(bird);
                 saveBirds();
                 
-                showToast('🎉 Vogel gespeichert!');
-                document.getElementById('birdForm').reset();
-                document.getElementById('photoPreview').style.display = 'none';
+                // Erfolgsmeldung anzeigen
+                showSuccessMessage();
+                
+                // Formular komplett leeren
+                resetForm();
             };
             
             reader.readAsDataURL(photoFile);
         });
+
+        // Formular zurücksetzen
+        function resetForm() {
+            document.getElementById('birdForm').reset();
+            document.getElementById('photoPreview').style.display = 'none';
+            document.getElementById('birdDate').valueAsDate = new Date();
+        }
+
+        // Erfolgsmeldung anzeigen
+        function showSuccessMessage() {
+            const overlay = document.getElementById('successOverlay');
+            overlay.classList.add('show');
+            
+            setTimeout(() => {
+                overlay.classList.remove('show');
+            }, 2000);
+        }
+
+        // App neu laden
+        function refreshApp() {
+            location.reload();
+        }
 
         // Vögel anzeigen
         function displayBirds() {
