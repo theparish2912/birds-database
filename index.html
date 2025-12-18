@@ -401,6 +401,71 @@
             font-size: 1.3em;
             margin-right: 5px;
         }
+
+        .backup-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .backup-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .backup-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .backup-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .export-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .export-btn:active {
+            opacity: 0.8;
+        }
+
+        .import-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .import-btn:active {
+            opacity: 0.8;
+        }
+
+        .backup-info {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f0f8ff;
+            border-radius: 8px;
+            font-size: 0.85em;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .file-import {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -445,16 +510,28 @@
                     <textarea id="notes" rows="3" placeholder="Besondere Beobachtungen..."></textarea>
                 </div>
 
-                <div class="loading" id="loading">
-                    🔍 Lade Informationen...
-                </div>
-
                 <button type="submit" class="submit-btn">Vogel speichern</button>
             </form>
         </div>
 
         <!-- Tab: Meine Vögel -->
         <div class="tab-content" id="list">
+            <div class="backup-section">
+                <h3>💾 Daten sichern & wiederherstellen</h3>
+                <div class="backup-buttons">
+                    <button class="backup-btn export-btn" onclick="exportData()">
+                        📥 Daten exportieren
+                    </button>
+                    <button class="backup-btn import-btn" onclick="document.getElementById('importFile').click()">
+                        📤 Daten importieren
+                    </button>
+                </div>
+                <input type="file" id="importFile" class="file-import" accept=".json" onchange="importData(event)">
+                <div class="backup-info">
+                    💡 <strong>Tipp:</strong> Exportiere regelmäßig deine Daten und speichere die Datei in deiner Cloud (Google Drive, iCloud, Dropbox). So kannst du sie auf jedem Gerät wiederherstellen!
+                </div>
+            </div>
+            
             <div class="stats" id="stats"></div>
             <div class="bird-list" id="birdList"></div>
             <div class="empty-state" id="emptyState" style="display: none;">
@@ -626,9 +703,6 @@
         document.getElementById('birdForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const loading = document.getElementById('loading');
-            loading.style.display = 'block';
-            
             const name = document.getElementById('birdName').value;
             const country = document.getElementById('countrySelect').value;
             const locationDetails = document.getElementById('locationDetails').value;
@@ -636,10 +710,8 @@
             const photoFile = document.getElementById('photoInput').files[0];
             
             const reader = new FileReader();
-            reader.onload = async (e) => {
+            reader.onload = (e) => {
                 const photoData = e.target.result;
-                
-                const additionalInfo = await fetchBirdInfo(name);
                 
                 const countryData = countries[country];
                 const location = locationDetails ? `${locationDetails}, ${country}` : country;
@@ -656,14 +728,12 @@
                     notes,
                     photo: photoData,
                     date: new Date().toLocaleDateString('de-DE'),
-                    time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-                    ...additionalInfo
+                    time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
                 };
                 
                 birds.unshift(bird);
                 saveBirds();
                 
-                loading.style.display = 'none';
                 showToast('🎉 Vogel gespeichert!');
                 document.getElementById('birdForm').reset();
                 document.getElementById('photoPreview').style.display = 'none';
@@ -671,17 +741,6 @@
             
             reader.readAsDataURL(photoFile);
         });
-
-        async function fetchBirdInfo(name) {
-            const families = ['Singvögel', 'Greifvögel', 'Wasservögel', 'Rabenvögel', 'Spechte', 'Tauben'];
-            const habitats = ['Wälder', 'Gewässer', 'Gebirge', 'Felder', 'Städte', 'Küsten'];
-            
-            return {
-                family: families[Math.floor(Math.random() * families.length)],
-                habitat: habitats[Math.floor(Math.random() * habitats.length)],
-                description: `Ein faszinierender Vogel der Familie ${families[Math.floor(Math.random() * families.length)]}.`
-            };
-        }
 
         // Vögel anzeigen
         function displayBirds() {
@@ -709,8 +768,8 @@
                     <p>Länder</p>
                 </div>
                 <div class="stat-card">
-                    <h3>${new Set(birds.map(b => b.family)).size}</h3>
-                    <p>Familien</p>
+                    <h3>${new Date().getFullYear()}</h3>
+                    <p>Jahr</p>
                 </div>
             `;
             
@@ -721,7 +780,6 @@
                         <h3>${bird.name}</h3>
                         <p><span class="country-flag">${bird.countryFlag}</span>${bird.location}</p>
                         <p>📅 ${bird.date} • ${bird.time}</p>
-                        <p>🏛️ ${bird.family}</p>
                         <div class="bird-actions">
                             <button class="btn-small btn-view" onclick="showBirdDetails(${bird.id})">Details</button>
                             <button class="btn-small btn-delete" onclick="deleteBird(${bird.id})">Löschen</button>
@@ -737,13 +795,10 @@
             document.getElementById('modalBody').innerHTML = `
                 <img src="${bird.photo}" class="modal-image" alt="${bird.name}">
                 <div class="modal-info">
-                    <p><strong>Familie:</strong> ${bird.family}</p>
-                    <p><strong>Lebensraum:</strong> ${bird.habitat}</p>
                     <p><strong>Land:</strong> <span class="country-flag">${bird.countryFlag}</span>${bird.country}</p>
                     ${bird.locationDetails ? `<p><strong>Genauer Ort:</strong> ${bird.locationDetails}</p>` : ''}
                     <p><strong>Datum:</strong> ${bird.date} um ${bird.time}</p>
                     ${bird.notes ? `<p><strong>Notizen:</strong> ${bird.notes}</p>` : ''}
-                    <p><strong>Beschreibung:</strong> ${bird.description}</p>
                 </div>
             `;
             document.getElementById('birdModal').classList.add('active');
@@ -796,6 +851,89 @@
             toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // Export-Funktion
+        function exportData() {
+            if (birds.length === 0) {
+                showToast('⚠️ Keine Daten zum Exportieren');
+                return;
+            }
+
+            const dataStr = JSON.stringify(birds, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            
+            const date = new Date().toISOString().split('T')[0];
+            link.download = `vogel-tracker-backup-${date}.json`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showToast(`✅ ${birds.length} Vögel exportiert!`);
+        }
+
+        // Import-Funktion
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedBirds = JSON.parse(e.target.result);
+                    
+                    if (!Array.isArray(importedBirds)) {
+                        showToast('❌ Ungültige Datei');
+                        return;
+                    }
+
+                    const validBirds = importedBirds.filter(bird => 
+                        bird.name && bird.country && bird.photo
+                    );
+
+                    if (validBirds.length === 0) {
+                        showToast('❌ Keine gültigen Daten gefunden');
+                        return;
+                    }
+
+                    // Frage ob Daten ersetzt oder hinzugefügt werden sollen
+                    if (birds.length > 0) {
+                        const replace = confirm(
+                            `Du hast bereits ${birds.length} Vögel gespeichert.\n\n` +
+                            `Möchtest du sie ERSETZEN (OK) oder HINZUFÜGEN (Abbrechen)?\n\n` +
+                            `Importierte Vögel: ${validBirds.length}`
+                        );
+
+                        if (replace) {
+                            birds = validBirds;
+                        } else {
+                            // Füge nur neue Vögel hinzu (keine Duplikate nach ID)
+                            const existingIds = new Set(birds.map(b => b.id));
+                            const newBirds = validBirds.filter(b => !existingIds.has(b.id));
+                            birds = [...birds, ...newBirds];
+                        }
+                    } else {
+                        birds = validBirds;
+                    }
+
+                    saveBirds();
+                    displayBirds();
+                    showToast(`✅ ${validBirds.length} Vögel importiert!`);
+                    
+                } catch (error) {
+                    showToast('❌ Fehler beim Importieren');
+                    console.error('Import error:', error);
+                }
+            };
+            
+            reader.readAsText(file);
+            event.target.value = '';
         }
 
         // Initial laden
