@@ -202,10 +202,19 @@
             font-weight: 600;
             margin-top: 20px;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
         .submit-btn:active {
             transform: scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
         }
 
         .bird-list {
@@ -637,7 +646,7 @@
                     <textarea id="notes" rows="3" placeholder="Besondere Beobachtungen..."></textarea>
                 </div>
 
-                <button type="submit" class="submit-btn">Vogel speichern</button>
+                <button type="submit" class="submit-btn" id="submitBtn">Vogel speichern</button>
             </form>
         </div>
 
@@ -850,8 +859,13 @@
         }
 
         // Formular absenden
-        document.getElementById('birdForm').addEventListener('submit', async (e) => {
+        document.getElementById('birdForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Button deaktivieren um Doppel-Speicherung zu verhindern
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Wird gespeichert...';
             
             const name = document.getElementById('birdName').value;
             const birdDate = document.getElementById('birdDate').value;
@@ -860,41 +874,66 @@
             const notes = document.getElementById('notes').value;
             const photoFile = document.getElementById('photoInput').files[0];
             
+            if (!photoFile) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Vogel speichern';
+                showToast('❌ Bitte Foto auswählen');
+                return;
+            }
+            
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const photoData = e.target.result;
-                
-                const countryData = countries[country];
-                const location = locationDetails ? `${locationDetails}, ${country}` : country;
-                
-                // Datum formatieren
-                const dateObj = new Date(birdDate);
-                const formattedDate = dateObj.toLocaleDateString('de-DE');
-                
-                const bird = {
-                    id: Date.now(),
-                    name,
-                    country,
-                    countryFlag: countryData.flag,
-                    locationDetails,
-                    location,
-                    latitude: countryData.coords[0],
-                    longitude: countryData.coords[1],
-                    notes,
-                    photo: photoData,
-                    date: formattedDate,
-                    dateRaw: birdDate,
-                    time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-                };
-                
-                birds.unshift(bird);
-                saveBirds();
-                
-                // Erfolgsmeldung anzeigen
-                showSuccessMessage();
-                
-                // Formular komplett leeren
-                resetForm();
+            reader.onload = function(e) {
+                try {
+                    const photoData = e.target.result;
+                    
+                    const countryData = countries[country];
+                    const location = locationDetails ? `${locationDetails}, ${country}` : country;
+                    
+                    // Datum formatieren
+                    const dateObj = new Date(birdDate);
+                    const formattedDate = dateObj.toLocaleDateString('de-DE');
+                    
+                    const bird = {
+                        id: Date.now(),
+                        name: name,
+                        country: country,
+                        countryFlag: countryData.flag,
+                        locationDetails: locationDetails,
+                        location: location,
+                        latitude: countryData.coords[0],
+                        longitude: countryData.coords[1],
+                        notes: notes,
+                        photo: photoData,
+                        date: formattedDate,
+                        dateRaw: birdDate,
+                        time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+                    };
+                    
+                    birds.unshift(bird);
+                    saveBirds();
+                    
+                    // Erfolgsmeldung anzeigen
+                    showSuccessMessage();
+                    
+                    // Formular komplett leeren
+                    resetForm();
+                    
+                    // Button wieder aktivieren
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Vogel speichern';
+                    
+                } catch (error) {
+                    console.error('Fehler beim Speichern:', error);
+                    showToast('❌ Fehler beim Speichern');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Vogel speichern';
+                }
+            };
+            
+            reader.onerror = function() {
+                showToast('❌ Fehler beim Laden des Fotos');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Vogel speichern';
             };
             
             reader.readAsDataURL(photoFile);
