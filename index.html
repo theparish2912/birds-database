@@ -586,6 +586,77 @@
         .file-import {
             display: none;
         }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .filter-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .filter-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .filter-controls select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 0.95em;
+            background: white;
+        }
+
+        .marker-cluster {
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .popup-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .popup-nav-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .popup-nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .popup-counter {
+            font-size: 0.85em;
+            color: #666;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -615,7 +686,7 @@
                             <span>Galerie</span>
                         </button>
                     </div>
-                    <input type="file" id="photoInput" class="photo-input" accept="image/*" required>
+                    <input type="file" id="photoInput" class="photo-input" accept="image/*,.heic,.heif" required>
                     <img id="photoPreview" class="photo-preview">
                 </div>
 
@@ -665,6 +736,23 @@
                 <input type="file" id="importFile" class="file-import" accept=".json" onchange="importData(event)">
                 <div class="backup-info">
                     💡 <strong>Tipp:</strong> Exportiere regelmäßig deine Daten und speichere die Datei in deiner Cloud (Google Drive, iCloud, Dropbox). So kannst du sie auf jedem Gerät wiederherstellen!
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>🔍 Filtern & Sortieren</h3>
+                <div class="filter-controls">
+                    <select id="filterCountry" onchange="filterAndSort()">
+                        <option value="">Alle Länder</option>
+                    </select>
+                    <select id="sortBy" onchange="filterAndSort()">
+                        <option value="date">Nach Datum ↓</option>
+                        <option value="date-asc">Nach Datum ↑</option>
+                        <option value="name">Nach Name A-Z</option>
+                        <option value="name-desc">Nach Name Z-A</option>
+                        <option value="country">Nach Land A-Z</option>
+                        <option value="country-desc">Nach Land Z-A</option>
+                    </select>
                 </div>
             </div>
             
@@ -723,9 +811,13 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
     <script>
         let birds = [];
         let map = null;
+        let filteredBirds = [];
+        let currentPopupBirds = [];
+        let currentPopupIndex = 0;
 
         // Länder mit Koordinaten (Hauptstädte als Mittelpunkt) und Flaggen
         const countries = {
@@ -830,17 +922,36 @@
             });
         });
 
-        // Foto-Vorschau
-        document.getElementById('photoInput').addEventListener('change', (e) => {
+        // Foto-Vorschau mit HEIC-Unterstützung
+        document.getElementById('photoInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if (file) {
+            if (!file) return;
+            
+            try {
+                let fileToRead = file;
+                
+                // HEIC zu JPEG konvertieren
+                if (file.type === 'image/heic' || file.type === 'image/heif' || file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+                    showToast('🔄 Konvertiere HEIC...');
+                    const convertedBlob = await heic2any({
+                        blob: file,
+                        toType: 'image/jpeg',
+                        quality: 0.9
+                    });
+                    fileToRead = convertedBlob;
+                }
+                
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const preview = document.getElementById('photoPreview');
                     preview.src = e.target.result;
                     preview.style.display = 'block';
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(fileToRead);
+                
+            } catch (error) {
+                console.error('Fehler beim Laden des Fotos:', error);
+                showToast('❌ Fehler beim Laden des Fotos');
             }
         });
 
@@ -882,9 +993,28 @@
             }
             
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
-                    const photoData = e.target.result;
+                    let photoData = e.target.result;
+                    
+                    // HEIC zu JPEG konvertieren wenn nötig
+                    if (photoFile.type === 'image/heic' || photoFile.type === 'image/heif' || photoFile.name.toLowerCase().endsWith('.heic') || photoFile.name.toLowerCase().endsWith('.heif')) {
+                        try {
+                            const convertedBlob = await heic2any({
+                                blob: photoFile,
+                                toType: 'image/jpeg',
+                                quality: 0.9
+                            });
+                            const convertedReader = new FileReader();
+                            photoData = await new Promise((resolve, reject) => {
+                                convertedReader.onload = (e) => resolve(e.target.result);
+                                convertedReader.onerror = reject;
+                                convertedReader.readAsDataURL(convertedBlob);
+                            });
+                        } catch (conversionError) {
+                            console.error('HEIC Konvertierung fehlgeschlagen:', conversionError);
+                        }
+                    }
                     
                     const countryData = countries[country];
                     const location = locationDetails ? `${locationDetails}, ${country}` : country;
@@ -961,8 +1091,12 @@
             location.reload();
         }
 
-        // Vögel anzeigen
+        // Vögel anzeigen mit Filter und Sortierung
         function displayBirds() {
+            filterAndSort();
+        }
+
+        function filterAndSort() {
             const list = document.getElementById('birdList');
             const stats = document.getElementById('stats');
             const empty = document.getElementById('emptyState');
@@ -976,23 +1110,50 @@
             
             empty.style.display = 'none';
             
+            // Filter nach Land
+            const filterCountry = document.getElementById('filterCountry').value;
+            filteredBirds = filterCountry ? birds.filter(b => b.country === filterCountry) : [...birds];
+            
+            // Sortierung
+            const sortBy = document.getElementById('sortBy').value;
+            filteredBirds.sort((a, b) => {
+                switch(sortBy) {
+                    case 'date':
+                        return new Date(b.dateRaw) - new Date(a.dateRaw);
+                    case 'date-asc':
+                        return new Date(a.dateRaw) - new Date(b.dateRaw);
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    case 'country':
+                        return a.country.localeCompare(b.country);
+                    case 'country-desc':
+                        return b.country.localeCompare(a.country);
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Statistiken
             const countriesVisited = [...new Set(birds.map(b => b.country))];
             stats.innerHTML = `
                 <div class="stat-card">
-                    <h3>${birds.length}</h3>
-                    <p>Vögel</p>
+                    <h3>${filteredBirds.length}</h3>
+                    <p>${filterCountry ? 'Gefiltert' : 'Vögel'}</p>
                 </div>
                 <div class="stat-card">
                     <h3>${countriesVisited.length}</h3>
                     <p>Länder</p>
                 </div>
                 <div class="stat-card">
-                    <h3>${new Date().getFullYear()}</h3>
-                    <p>Jahr</p>
+                    <h3>${birds.length}</h3>
+                    <p>Gesamt</p>
                 </div>
             `;
             
-            list.innerHTML = birds.map(bird => `
+            // Vögel-Grid
+            list.innerHTML = filteredBirds.map(bird => `
                 <div class="bird-card">
                     <img src="${bird.photo}" alt="${bird.name}">
                     <div class="bird-info">
@@ -1006,6 +1167,23 @@
                     </div>
                 </div>
             `).join('');
+            
+            // Länder-Filter aktualisieren
+            updateCountryFilter();
+        }
+
+        function updateCountryFilter() {
+            const filterSelect = document.getElementById('filterCountry');
+            const currentValue = filterSelect.value;
+            const countries = [...new Set(birds.map(b => b.country))].sort();
+            
+            filterSelect.innerHTML = '<option value="">Alle Länder</option>' + 
+                countries.map(country => {
+                    const bird = birds.find(b => b.country === country);
+                    return `<option value="${country}">${bird.countryFlag} ${country}</option>`;
+                }).join('');
+            
+            filterSelect.value = currentValue;
         }
 
         function showBirdDetails(id) {
@@ -1047,22 +1225,82 @@
                 attribution: '© OpenStreetMap'
             }).addTo(map);
             
+            // Gruppiere Vögel nach Koordinaten
+            const locationGroups = {};
             birds.forEach(bird => {
-                const marker = L.marker([bird.latitude, bird.longitude]).addTo(map);
-                marker.bindPopup(`
-                    <div style="text-align: center; min-width: 150px;">
-                        <img src="${bird.photo}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;">
-                        <strong style="display: block; margin-bottom: 5px;">${bird.name}</strong>
-                        <span style="font-size: 1.2em;">${bird.countryFlag}</span> ${bird.country}<br>
-                        <small>${bird.date}</small>
-                    </div>
-                `);
+                const key = `${bird.latitude},${bird.longitude}`;
+                if (!locationGroups[key]) {
+                    locationGroups[key] = [];
+                }
+                locationGroups[key].push(bird);
+            });
+            
+            // Erstelle Marker für jede Gruppe
+            Object.entries(locationGroups).forEach(([key, birdsAtLocation]) => {
+                const [lat, lng] = key.split(',').map(Number);
+                const count = birdsAtLocation.length;
+                
+                // Custom Icon mit Zahl
+                const icon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div class="marker-cluster" style="width: ${30 + count * 5}px; height: ${30 + count * 5}px; font-size: ${12 + count}px;">${count}</div>`,
+                    iconSize: [30 + count * 5, 30 + count * 5]
+                });
+                
+                const marker = L.marker([lat, lng], { icon: icon }).addTo(map);
+                
+                // Popup mit Navigation
+                marker.on('click', () => {
+                    currentPopupBirds = birdsAtLocation;
+                    currentPopupIndex = 0;
+                    showPopupContent(marker);
+                });
             });
             
             if (birds.length > 0) {
-                const group = L.featureGroup(birds.map(b => L.marker([b.latitude, b.longitude])));
+                const group = L.featureGroup(
+                    Object.keys(locationGroups).map(key => {
+                        const [lat, lng] = key.split(',').map(Number);
+                        return L.marker([lat, lng]);
+                    })
+                );
                 map.fitBounds(group.getBounds().pad(0.1));
             }
+        }
+
+        function showPopupContent(marker) {
+            const bird = currentPopupBirds[currentPopupIndex];
+            const totalCount = currentPopupBirds.length;
+            
+            const popupContent = `
+                <div style="text-align: center; min-width: 200px;">
+                    <img src="${bird.photo}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;">
+                    <strong style="display: block; margin-bottom: 5px; font-size: 1.1em;">${bird.name}</strong>
+                    <span style="font-size: 1.2em;">${bird.countryFlag}</span> ${bird.country}<br>
+                    <small style="color: #666;">${bird.date}</small>
+                    ${totalCount > 1 ? `
+                        <div class="popup-navigation">
+                            <button class="popup-nav-btn" onclick="navigatePopup(-1)" ${currentPopupIndex === 0 ? 'disabled' : ''}>◀ Zurück</button>
+                            <span class="popup-counter">${currentPopupIndex + 1} / ${totalCount}</span>
+                            <button class="popup-nav-btn" onclick="navigatePopup(1)" ${currentPopupIndex === totalCount - 1 ? 'disabled' : ''}>Weiter ▶</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent, { maxWidth: 250 }).openPopup();
+        }
+
+        function navigatePopup(direction) {
+            currentPopupIndex += direction;
+            currentPopupIndex = Math.max(0, Math.min(currentPopupIndex, currentPopupBirds.length - 1));
+            
+            // Finde den aktiven Marker und aktualisiere Popup
+            map.eachLayer((layer) => {
+                if (layer instanceof L.Marker && layer.getPopup() && layer.getPopup().isOpen()) {
+                    showPopupContent(layer);
+                }
+            });
         }
 
         function showToast(message) {
