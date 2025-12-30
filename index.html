@@ -702,6 +702,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Lateinischer Name (optional)</label>
+                    <input type="text" id="latinName" placeholder="z.B. Erithacus rubecula">
+                </div>
+
+                <div class="form-group">
                     <label>Aufnahmedatum *</label>
                     <input type="date" id="birdDate" required>
                 </div>
@@ -828,64 +833,11 @@
         // Länder mit Koordinaten (Hauptstädte als Mittelpunkt) und Flaggen
         const countries = {
             'Deutschland': { coords: [51.1657, 10.4515], flag: '🇩🇪' },
-            'Österreich': { coords: [47.5162, 14.5501], flag: '🇦🇹' },
-            'Schweiz': { coords: [46.8182, 8.2275], flag: '🇨🇭' },
-            'Frankreich': { coords: [46.2276, 2.2137], flag: '🇫🇷' },
-            'Italien': { coords: [41.8719, 12.5674], flag: '🇮🇹' },
-            'Spanien': { coords: [40.4637, -3.7492], flag: '🇪🇸' },
-            'Portugal': { coords: [39.3999, -8.2245], flag: '🇵🇹' },
-            'Niederlande': { coords: [52.1326, 5.2913], flag: '🇳🇱' },
-            'Belgien': { coords: [50.5039, 4.4699], flag: '🇧🇪' },
-            'Luxemburg': { coords: [49.8153, 6.1296], flag: '🇱🇺' },
-            'Polen': { coords: [51.9194, 19.1451], flag: '🇵🇱' },
-            'Tschechien': { coords: [49.8175, 15.4730], flag: '🇨🇿' },
-            'Slowakei': { coords: [48.6690, 19.6990], flag: '🇸🇰' },
-            'Ungarn': { coords: [47.1625, 19.5033], flag: '🇭🇺' },
-            'Rumänien': { coords: [45.9432, 24.9668], flag: '🇷🇴' },
-            'Bulgarien': { coords: [42.7339, 25.4858], flag: '🇧🇬' },
             'Griechenland': { coords: [39.0742, 21.8243], flag: '🇬🇷' },
-            'Kroatien': { coords: [45.1000, 15.2000], flag: '🇭🇷' },
-            'Slowenien': { coords: [46.1512, 14.9955], flag: '🇸🇮' },
-            'Serbien': { coords: [44.0165, 21.0059], flag: '🇷🇸' },
-            'Dänemark': { coords: [56.2639, 9.5018], flag: '🇩🇰' },
-            'Schweden': { coords: [60.1282, 18.6435], flag: '🇸🇪' },
-            'Norwegen': { coords: [60.4720, 8.4689], flag: '🇳🇴' },
-            'Finnland': { coords: [61.9241, 25.7482], flag: '🇫🇮' },
-            'Island': { coords: [64.9631, -19.0208], flag: '🇮🇸' },
-            'Irland': { coords: [53.4129, -8.2439], flag: '🇮🇪' },
-            'Vereinigtes Königreich': { coords: [55.3781, -3.4360], flag: '🇬🇧' },
-            'USA': { coords: [37.0902, -95.7129], flag: '🇺🇸' },
-            'Kanada': { coords: [56.1304, -106.3468], flag: '🇨🇦' },
-            'Mexiko': { coords: [23.6345, -102.5528], flag: '🇲🇽' },
-            'Brasilien': { coords: [-14.2350, -51.9253], flag: '🇧🇷' },
-            'Argentinien': { coords: [-38.4161, -63.6167], flag: '🇦🇷' },
-            'Chile': { coords: [-35.6751, -71.5430], flag: '🇨🇱' },
             'Peru': { coords: [-9.1900, -75.0152], flag: '🇵🇪' },
-            'Kolumbien': { coords: [4.5709, -74.2973], flag: '🇨🇴' },
-            'Japan': { coords: [36.2048, 138.2529], flag: '🇯🇵' },
-            'China': { coords: [35.8617, 104.1954], flag: '🇨🇳' },
-            'Südkorea': { coords: [35.9078, 127.7669], flag: '🇰🇷' },
-            'Indien': { coords: [20.5937, 78.9629], flag: '🇮🇳' },
-            'Thailand': { coords: [15.8700, 100.9925], flag: '🇹🇭' },
-            'Vietnam': { coords: [14.0583, 108.2772], flag: '🇻🇳' },
-            'Indonesien': { coords: [-0.7893, 113.9213], flag: '🇮🇩' },
-            'Philippinen': { coords: [12.8797, 121.7740], flag: '🇵🇭' },
-            'Malaysia': { coords: [4.2105, 101.9758], flag: '🇲🇾' },
-            'Singapur': { coords: [1.3521, 103.8198], flag: '🇸🇬' },
+            'Schweiz': { coords: [46.8182, 8.2275], flag: '🇨🇭' },
             'Sri Lanka': { coords: [7.8731, 80.7718], flag: '🇱🇰' },
-            'Australien': { coords: [-25.2744, 133.7751], flag: '🇦🇺' },
-            'Neuseeland': { coords: [-40.9006, 174.8860], flag: '🇳🇿' },
-            'Südafrika': { coords: [-30.5595, 22.9375], flag: '🇿🇦' },
-            'Ägypten': { coords: [26.8206, 30.8025], flag: '🇪🇬' },
-            'Marokko': { coords: [31.7917, -7.0926], flag: '🇲🇦' },
-            'Kenia': { coords: [-0.0236, 37.9062], flag: '🇰🇪' },
-            'Tansania': { coords: [-6.3690, 34.8888], flag: '🇹🇿' },
-            'Türkei': { coords: [38.9637, 35.2433], flag: '🇹🇷' },
-            'Russland': { coords: [61.5240, 105.3188], flag: '🇷🇺' },
-            'Ukraine': { coords: [48.3794, 31.1656], flag: '🇺🇦' },
-            'Israel': { coords: [31.0461, 34.8516], flag: '🇮🇱' },
-            'Vereinigte Arabische Emirate': { coords: [23.4241, 53.8478], flag: '🇦🇪' },
-            'Saudi-Arabien': { coords: [23.8859, 45.0792], flag: '🇸🇦' }
+            'Thailand': { coords: [15.8700, 100.9925], flag: '🇹🇭' }
         };
 
         // Länder-Dropdown füllen
@@ -1009,6 +961,7 @@
             submitBtn.textContent = editingBirdId ? 'Wird aktualisiert...' : 'Wird gespeichert...';
             
             const name = document.getElementById('birdName').value;
+            const latinName = document.getElementById('latinName').value;
             const birdDate = document.getElementById('birdDate').value;
             const country = document.getElementById('countrySelect').value;
             const locationDetails = document.getElementById('locationDetails').value;
@@ -1018,9 +971,9 @@
             // Nutze komprimiertes Bild aus Preview
             let photoData = photoPreview.dataset.compressed || photoPreview.src;
             
-            if (!photoData) {
+            if (!photoData || photoData === '') {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Vogel speichern';
+                submitBtn.textContent = editingBirdId ? 'Änderungen speichern' : 'Vogel speichern';
                 showToast('❌ Bitte Foto auswählen');
                 return;
             }
@@ -1029,49 +982,51 @@
                 const countryData = countries[country];
                 const location = locationDetails ? `${locationDetails}, ${country}` : country;
                 
-                // Datum formatieren
+                // Datum formatieren (ohne Uhrzeit)
                 const dateObj = new Date(birdDate);
                 const formattedDate = dateObj.toLocaleDateString('de-DE');
+                
+                const birdData = {
+                    name: name,
+                    latinName: latinName,
+                    country: country,
+                    countryFlag: countryData.flag,
+                    locationDetails: locationDetails,
+                    location: location,
+                    latitude: countryData.coords[0],
+                    longitude: countryData.coords[1],
+                    notes: notes,
+                    photo: photoData,
+                    date: formattedDate,
+                    dateRaw: birdDate
+                };
                 
                 if (editingBirdId) {
                     // Bearbeiten: Existierenden Vogel aktualisieren
                     const birdIndex = birds.findIndex(b => b.id === editingBirdId);
                     if (birdIndex !== -1) {
                         birds[birdIndex] = {
-                            ...birds[birdIndex],
-                            name: name,
-                            country: country,
-                            countryFlag: countryData.flag,
-                            locationDetails: locationDetails,
-                            location: location,
-                            latitude: countryData.coords[0],
-                            longitude: countryData.coords[1],
-                            notes: notes,
-                            photo: photoData,
-                            date: formattedDate,
-                            dateRaw: birdDate,
-                            time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+                            id: editingBirdId,
+                            ...birdData
                         };
                         saveBirds();
-                        showToast('✅ Vogel aktualisiert!');
+                        showToast('✅ Vogel wurde aktualisiert!');
                         editingBirdId = null;
+                        
+                        // Wechsle zurück zu "Meine Vögel" Tab
+                        setTimeout(() => {
+                            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                            document.querySelector('[data-tab="list"]').classList.add('active');
+                            document.getElementById('list').classList.add('active');
+                            displayBirds();
+                        }, 1000);
                     }
                 } else {
                     // Neu: Neuen Vogel hinzufügen
                     const bird = {
                         id: Date.now(),
-                        name: name,
-                        country: country,
-                        countryFlag: countryData.flag,
-                        locationDetails: locationDetails,
-                        location: location,
-                        latitude: countryData.coords[0],
-                        longitude: countryData.coords[1],
-                        notes: notes,
-                        photo: photoData,
-                        date: formattedDate,
-                        dateRaw: birdDate,
-                        time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+                        ...birdData
                     };
                     
                     birds.unshift(bird);
@@ -1088,9 +1043,9 @@
                 
             } catch (error) {
                 console.error('Fehler beim Speichern:', error);
-                showToast('❌ Fehler beim Speichern');
+                showToast('❌ Fehler beim Speichern: ' + error.message);
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Vogel speichern';
+                submitBtn.textContent = editingBirdId ? 'Änderungen speichern' : 'Vogel speichern';
             }
         });
 
@@ -1186,8 +1141,9 @@
                     <img src="${bird.photo}" alt="${bird.name}">
                     <div class="bird-info">
                         <h3>${bird.name}</h3>
+                        ${bird.latinName ? `<p style="font-style: italic; color: #888;">${bird.latinName}</p>` : ''}
                         <p><span class="country-flag">${bird.countryFlag}</span>${bird.location}</p>
-                        <p>📅 ${bird.date} • ${bird.time}</p>
+                        <p>📅 ${bird.date}</p>
                         <div class="bird-actions">
                             <button class="btn-small btn-view" onclick="showBirdDetails(${bird.id})">Details</button>
                             <button class="btn-small btn-edit" onclick="editBird(${bird.id})">Bearbeiten</button>
@@ -1221,9 +1177,10 @@
             document.getElementById('modalBody').innerHTML = `
                 <img src="${bird.photo}" class="modal-image" alt="${bird.name}">
                 <div class="modal-info">
+                    ${bird.latinName ? `<p><strong>Lateinischer Name:</strong> <em>${bird.latinName}</em></p>` : ''}
                     <p><strong>Land:</strong> <span class="country-flag">${bird.countryFlag}</span>${bird.country}</p>
                     ${bird.locationDetails ? `<p><strong>Genauer Ort:</strong> ${bird.locationDetails}</p>` : ''}
-                    <p><strong>Datum:</strong> ${bird.date} um ${bird.time}</p>
+                    <p><strong>Datum:</strong> ${bird.date}</p>
                     ${bird.notes ? `<p><strong>Notizen:</strong> ${bird.notes}</p>` : ''}
                 </div>
             `;
@@ -1256,6 +1213,7 @@
             // Fülle Formular mit Vogel-Daten
             editingBirdId = bird.id;
             document.getElementById('birdName').value = bird.name;
+            document.getElementById('latinName').value = bird.latinName || '';
             document.getElementById('birdDate').value = bird.dateRaw;
             document.getElementById('countrySelect').value = bird.country;
             document.getElementById('locationDetails').value = bird.locationDetails || '';
@@ -1338,6 +1296,7 @@
                 <div style="text-align: center; min-width: 200px;">
                     <img src="${bird.photo}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;">
                     <strong style="display: block; margin-bottom: 5px; font-size: 1.1em;">${bird.name}</strong>
+                    ${bird.latinName ? `<em style="display: block; font-size: 0.85em; color: #888; margin-bottom: 5px;">${bird.latinName}</em>` : ''}
                     <span style="font-size: 1.2em;">${bird.countryFlag}</span> ${bird.country}<br>
                     <small style="color: #666;">${bird.date}</small>
                     ${totalCount > 1 ? `
