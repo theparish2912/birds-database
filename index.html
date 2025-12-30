@@ -955,6 +955,8 @@
         document.getElementById('birdForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            console.log('Form submitted, editingBirdId:', editingBirdId);
+            
             // Button deaktivieren um Doppel-Speicherung zu verhindern
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
@@ -968,10 +970,15 @@
             const notes = document.getElementById('notes').value;
             const photoPreview = document.getElementById('photoPreview');
             
+            console.log('Photo preview src:', photoPreview.src);
+            console.log('Photo preview dataset:', photoPreview.dataset.compressed);
+            
             // Nutze komprimiertes Bild aus Preview
             let photoData = photoPreview.dataset.compressed || photoPreview.src;
             
-            if (!photoData || photoData === '') {
+            // Prüfe ob Foto vorhanden ist (auch data:image URLs sind gültig)
+            if (!photoData || (!photoData.startsWith('data:image') && !photoData.startsWith('blob:'))) {
+                console.error('Kein gültiges Foto gefunden');
                 submitBtn.disabled = false;
                 submitBtn.textContent = editingBirdId ? 'Änderungen speichern' : 'Vogel speichern';
                 showToast('❌ Bitte Foto auswählen');
@@ -1003,15 +1010,27 @@
                 
                 if (editingBirdId) {
                     // Bearbeiten: Existierenden Vogel aktualisieren
+                    console.log('Updating bird with ID:', editingBirdId);
                     const birdIndex = birds.findIndex(b => b.id === editingBirdId);
+                    console.log('Found bird at index:', birdIndex);
+                    
                     if (birdIndex !== -1) {
                         birds[birdIndex] = {
                             id: editingBirdId,
                             ...birdData
                         };
+                        console.log('Bird updated:', birds[birdIndex]);
                         saveBirds();
+                        console.log('Birds saved to localStorage');
+                        
                         showToast('✅ Vogel wurde aktualisiert!');
-                        editingBirdId = null;
+                        
+                        // Formular leeren
+                        resetForm();
+                        
+                        // Button wieder aktivieren
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Vogel speichern';
                         
                         // Wechsle zurück zu "Meine Vögel" Tab
                         setTimeout(() => {
@@ -1020,10 +1039,17 @@
                             document.querySelector('[data-tab="list"]').classList.add('active');
                             document.getElementById('list').classList.add('active');
                             displayBirds();
-                        }, 1000);
+                            console.log('Switched to list view');
+                        }, 1500);
+                    } else {
+                        console.error('Bird not found in array');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Änderungen speichern';
+                        showToast('❌ Vogel nicht gefunden');
                     }
                 } else {
                     // Neu: Neuen Vogel hinzufügen
+                    console.log('Adding new bird');
                     const bird = {
                         id: Date.now(),
                         ...birdData
@@ -1032,14 +1058,14 @@
                     birds.unshift(bird);
                     saveBirds();
                     showSuccessMessage();
+                    
+                    // Formular komplett leeren
+                    resetForm();
+                    
+                    // Button wieder aktivieren
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Vogel speichern';
                 }
-                
-                // Formular komplett leeren
-                resetForm();
-                
-                // Button wieder aktivieren
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Vogel speichern';
                 
             } catch (error) {
                 console.error('Fehler beim Speichern:', error);
