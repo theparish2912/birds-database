@@ -811,7 +811,6 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
     <script>
         let birds = [];
         let map = null;
@@ -922,37 +921,22 @@
             });
         });
 
-        // Foto-Vorschau mit HEIC-Unterstützung
-        document.getElementById('photoInput').addEventListener('change', async (e) => {
+        // Foto-Vorschau - iPhone HEIC wird automatisch als JPEG gelesen
+        document.getElementById('photoInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
             
-            try {
-                let fileToRead = file;
-                
-                // HEIC zu JPEG konvertieren
-                if (file.type === 'image/heic' || file.type === 'image/heif' || file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
-                    showToast('🔄 Konvertiere HEIC...');
-                    const convertedBlob = await heic2any({
-                        blob: file,
-                        toType: 'image/jpeg',
-                        quality: 0.9
-                    });
-                    fileToRead = convertedBlob;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const preview = document.getElementById('photoPreview');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                };
-                reader.readAsDataURL(fileToRead);
-                
-            } catch (error) {
-                console.error('Fehler beim Laden des Fotos:', error);
+            // iPhone konvertiert HEIC automatisch zu JPEG wenn wir es als DataURL lesen
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('photoPreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.onerror = function() {
                 showToast('❌ Fehler beim Laden des Fotos');
-            }
+            };
+            reader.readAsDataURL(file);
         });
 
         // Kamera öffnen
@@ -993,28 +977,10 @@
             }
             
             const reader = new FileReader();
-            reader.onload = async function(e) {
+            reader.onload = function(e) {
                 try {
-                    let photoData = e.target.result;
-                    
-                    // HEIC zu JPEG konvertieren wenn nötig
-                    if (photoFile.type === 'image/heic' || photoFile.type === 'image/heif' || photoFile.name.toLowerCase().endsWith('.heic') || photoFile.name.toLowerCase().endsWith('.heif')) {
-                        try {
-                            const convertedBlob = await heic2any({
-                                blob: photoFile,
-                                toType: 'image/jpeg',
-                                quality: 0.9
-                            });
-                            const convertedReader = new FileReader();
-                            photoData = await new Promise((resolve, reject) => {
-                                convertedReader.onload = (e) => resolve(e.target.result);
-                                convertedReader.onerror = reject;
-                                convertedReader.readAsDataURL(convertedBlob);
-                            });
-                        } catch (conversionError) {
-                            console.error('HEIC Konvertierung fehlgeschlagen:', conversionError);
-                        }
-                    }
+                    // iPhone konvertiert HEIC automatisch zu JPEG beim Lesen als DataURL
+                    const photoData = e.target.result;
                     
                     const countryData = countries[country];
                     const location = locationDetails ? `${locationDetails}, ${country}` : country;
