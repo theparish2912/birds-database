@@ -668,8 +668,7 @@
     <div class="app-header">
         <div class="app-header-content">
             <h1>🦅 Vogel-Tracker</h1>
-            <h2 style="color:red;">!Happy Birthday Daphni!</h2> 
-            <p>Version: 1.0</p>
+            <p>Version: 1.01</p>
         </div>
         <button class="refresh-btn" onclick="refreshApp()" title="Seite aktualisieren">
             🔄
@@ -834,6 +833,7 @@
         const countries = {
             'Deutschland': { coords: [51.1657, 10.4515], flag: '🇩🇪' },
             'Griechenland': { coords: [39.0742, 21.8243], flag: '🇬🇷' },
+            'Niederlande': { coords: [52.1326, 5.2913], flag: '🇳🇱' },
             'Peru': { coords: [-9.1900, -75.0152], flag: '🇵🇪' },
             'Schweiz': { coords: [46.8182, 8.2275], flag: '🇨🇭' },
             'Sri Lanka': { coords: [7.8731, 80.7718], flag: '🇱🇰' },
@@ -955,12 +955,12 @@
         document.getElementById('birdForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            console.log('Form submitted, editingBirdId:', editingBirdId);
-            
-            // Button deaktivieren um Doppel-Speicherung zu verhindern
+            // Button deaktivieren
             const submitBtn = document.getElementById('submitBtn');
+            const isEditing = editingBirdId !== null;
+            
             submitBtn.disabled = true;
-            submitBtn.textContent = editingBirdId ? 'Wird aktualisiert...' : 'Wird gespeichert...';
+            submitBtn.textContent = isEditing ? 'Wird aktualisiert...' : 'Wird gespeichert...';
             
             const name = document.getElementById('birdName').value;
             const latinName = document.getElementById('latinName').value;
@@ -970,17 +970,13 @@
             const notes = document.getElementById('notes').value;
             const photoPreview = document.getElementById('photoPreview');
             
-            console.log('Photo preview src:', photoPreview.src);
-            console.log('Photo preview dataset:', photoPreview.dataset.compressed);
-            
-            // Nutze komprimiertes Bild aus Preview
+            // Nutze komprimiertes Bild
             let photoData = photoPreview.dataset.compressed || photoPreview.src;
             
-            // Prüfe ob Foto vorhanden ist (auch data:image URLs sind gültig)
+            // Validierung
             if (!photoData || (!photoData.startsWith('data:image') && !photoData.startsWith('blob:'))) {
-                console.error('Kein gültiges Foto gefunden');
                 submitBtn.disabled = false;
-                submitBtn.textContent = editingBirdId ? 'Änderungen speichern' : 'Vogel speichern';
+                submitBtn.textContent = isEditing ? 'Änderungen speichern' : 'Vogel speichern';
                 showToast('❌ Bitte Foto auswählen');
                 return;
             }
@@ -988,8 +984,6 @@
             try {
                 const countryData = countries[country];
                 const location = locationDetails ? `${locationDetails}, ${country}` : country;
-                
-                // Datum formatieren (ohne Uhrzeit)
                 const dateObj = new Date(birdDate);
                 const formattedDate = dateObj.toLocaleDateString('de-DE');
                 
@@ -1008,48 +1002,37 @@
                     dateRaw: birdDate
                 };
                 
-                if (editingBirdId) {
-                    // Bearbeiten: Existierenden Vogel aktualisieren
-                    console.log('Updating bird with ID:', editingBirdId);
+                if (isEditing) {
+                    // BEARBEITEN
                     const birdIndex = birds.findIndex(b => b.id === editingBirdId);
-                    console.log('Found bird at index:', birdIndex);
                     
                     if (birdIndex !== -1) {
                         birds[birdIndex] = {
                             id: editingBirdId,
                             ...birdData
                         };
-                        console.log('Bird updated:', birds[birdIndex]);
                         saveBirds();
-                        console.log('Birds saved to localStorage');
                         
-                        showToast('✅ Vogel wurde aktualisiert!');
-                        
-                        // Formular leeren
+                        // Reset
+                        editingBirdId = null;
                         resetForm();
                         
-                        // Button wieder aktivieren
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Vogel speichern';
+                        // Toast zeigen
+                        showToast('✅ Vogel wurde aktualisiert!');
                         
-                        // Wechsle zurück zu "Meine Vögel" Tab
+                        // Nach 1 Sekunde zur Liste wechseln
                         setTimeout(() => {
                             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                             document.querySelector('[data-tab="list"]').classList.add('active');
                             document.getElementById('list').classList.add('active');
                             displayBirds();
-                            console.log('Switched to list view');
-                        }, 1500);
+                        }, 1000);
                     } else {
-                        console.error('Bird not found in array');
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Änderungen speichern';
-                        showToast('❌ Vogel nicht gefunden');
+                        throw new Error('Vogel nicht gefunden');
                     }
                 } else {
-                    // Neu: Neuen Vogel hinzufügen
-                    console.log('Adding new bird');
+                    // NEU HINZUFÜGEN
                     const bird = {
                         id: Date.now(),
                         ...birdData
@@ -1057,21 +1040,19 @@
                     
                     birds.unshift(bird);
                     saveBirds();
-                    showSuccessMessage();
                     
-                    // Formular komplett leeren
                     resetForm();
-                    
-                    // Button wieder aktivieren
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Vogel speichern';
+                    showSuccessMessage();
                 }
                 
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Vogel speichern';
+                
             } catch (error) {
-                console.error('Fehler beim Speichern:', error);
+                console.error('Fehler:', error);
                 showToast('❌ Fehler beim Speichern: ' + error.message);
                 submitBtn.disabled = false;
-                submitBtn.textContent = editingBirdId ? 'Änderungen speichern' : 'Vogel speichern';
+                submitBtn.textContent = isEditing ? 'Änderungen speichern' : 'Vogel speichern';
             }
         });
 
