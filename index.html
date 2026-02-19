@@ -53,27 +53,113 @@
             margin-top: 5px;
         }
 
-        .refresh-btn {
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .logout-btn {
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            font-size: 1.5em;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .login-box h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .login-box p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .google-btn {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 10px;
             transition: all 0.3s;
-            flex-shrink: 0;
         }
 
-        .refresh-btn:active {
-            background: rgba(255, 255, 255, 0.3);
-            transform: rotate(180deg);
+        .google-btn:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
         }
 
+        .sync-status {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 101;
+        }
+
+        .sync-status.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Alle anderen Styles von vorher bleiben gleich */
         .content {
             padding: 15px;
             max-width: 800px;
@@ -107,6 +193,7 @@
         }
 
         .form-group input[type="text"],
+        .form-group input[type="date"],
         .form-group select,
         .form-group textarea {
             width: 100%;
@@ -123,32 +210,6 @@
         .form-group textarea:focus {
             outline: none;
             border-color: #667eea;
-        }
-
-        .form-group select {
-            cursor: pointer;
-        }
-
-        .camera-btn {
-            width: 100%;
-            padding: 60px 20px;
-            border: 3px dashed #667eea;
-            border-radius: 12px;
-            background: white;
-            color: #667eea;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .camera-btn:active {
-            transform: scale(0.98);
-            background: #f0f0f0;
         }
 
         .photo-options {
@@ -274,6 +335,7 @@
             font-size: 0.85em;
             font-weight: 600;
             flex: 1;
+            cursor: pointer;
         }
 
         .btn-view {
@@ -429,13 +491,6 @@
             color: #667eea;
         }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #667eea;
-            display: none;
-        }
-
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -527,71 +582,6 @@
             margin-right: 5px;
         }
 
-        .backup-section {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .backup-section h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
-
-        .backup-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .backup-btn {
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.95em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .export-btn {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .export-btn:active {
-            opacity: 0.8;
-        }
-
-        .import-btn {
-            background: #2196F3;
-            color: white;
-        }
-
-        .import-btn:active {
-            opacity: 0.8;
-        }
-
-        .backup-info {
-            margin-top: 15px;
-            padding: 12px;
-            background: #f0f8ff;
-            border-radius: 8px;
-            font-size: 0.85em;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .file-import {
-            display: none;
-        }
-
         .filter-section {
             background: white;
             padding: 20px;
@@ -665,136 +655,151 @@
     </style>
 </head>
 <body>
-    <div class="app-header">
-        <div class="app-header-content">
-            <h1>🦅 Vogel-Tracker</h1>
-            <p>Version: 1.01</p>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <div style="font-size: 4em; margin-bottom: 20px;">🦅</div>
+            <h2>Vogel-Tracker</h2>
+            <p>Melde dich an um deine Vogel-Beobachtungen in der Cloud zu speichern</p>
+            <button class="google-btn" onclick="loginWithGoogle()">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Mit Google anmelden
+            </button>
+            <p style="margin-top: 20px; font-size: 0.8em; color: #999;">
+                Version 2.0 - Cloud Edition
+            </p>
         </div>
-        <button class="refresh-btn" onclick="refreshApp()" title="Seite aktualisieren">
-            🔄
-        </button>
     </div>
 
-    <div class="content">
-        <!-- Tab: Vogel hinzufügen -->
-        <div class="tab-content active" id="add">
-            <form id="birdForm">
-                <div class="form-group">
-                    <label>Foto hinzufügen *</label>
-                    <div class="photo-options">
-                        <button type="button" class="photo-option-btn" onclick="openCamera()">
-                            <span style="font-size: 2.5em;">📸</span>
-                            <span>Foto aufnehmen</span>
-                        </button>
-                        <button type="button" class="photo-option-btn" onclick="openGallery()">
-                            <span style="font-size: 2.5em;">🖼️</span>
-                            <span>Galerie</span>
-                        </button>
+    <!-- Sync Status -->
+    <div class="sync-status" id="syncStatus">
+        <div class="spinner"></div>
+        <span>Synchronisiere...</span>
+    </div>
+
+    <!-- Main App (hidden until logged in) -->
+    <div id="mainApp" style="display: none;">
+        <div class="app-header">
+            <div class="app-header-content">
+                <h1>🦅 Vogel-Tracker</h1>
+                <p>Version: 2.0 Cloud</p>
+            </div>
+            <div class="user-info">
+                <img id="userAvatar" class="user-avatar" src="" alt="User">
+                <button class="logout-btn" onclick="logout()">Abmelden</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Tab: Vogel hinzufügen -->
+            <div class="tab-content active" id="add">
+                <form id="birdForm">
+                    <div class="form-group">
+                        <label>Foto hinzufügen *</label>
+                        <div class="photo-options">
+                            <button type="button" class="photo-option-btn" onclick="openCamera()">
+                                <span style="font-size: 2.5em;">📸</span>
+                                <span>Foto aufnehmen</span>
+                            </button>
+                            <button type="button" class="photo-option-btn" onclick="openGallery()">
+                                <span style="font-size: 2.5em;">🖼️</span>
+                                <span>Galerie</span>
+                            </button>
+                        </div>
+                        <input type="file" id="photoInput" class="photo-input" accept="image/*,.heic,.heif" required>
+                        <img id="photoPreview" class="photo-preview">
                     </div>
-                    <input type="file" id="photoInput" class="photo-input" accept="image/*,.heic,.heif" required>
-                    <img id="photoPreview" class="photo-preview">
-                </div>
 
-                <div class="form-group">
-                    <label>Vogelname *</label>
-                    <input type="text" id="birdName" required placeholder="z.B. Rotkehlchen">
-                </div>
+                    <div class="form-group">
+                        <label>Vogelname *</label>
+                        <input type="text" id="birdName" required placeholder="z.B. Rotkehlchen">
+                    </div>
 
-                <div class="form-group">
-                    <label>Lateinischer Name (optional)</label>
-                    <input type="text" id="latinName" placeholder="z.B. Erithacus rubecula">
-                </div>
+                    <div class="form-group">
+                        <label>Lateinischer Name (optional)</label>
+                        <input type="text" id="latinName" placeholder="z.B. Erithacus rubecula">
+                    </div>
 
-                <div class="form-group">
-                    <label>Aufnahmedatum *</label>
-                    <input type="date" id="birdDate" required>
-                </div>
+                    <div class="form-group">
+                        <label>Aufnahmedatum *</label>
+                        <input type="date" id="birdDate" required>
+                    </div>
 
-                <div class="form-group">
-                    <label>Land *</label>
-                    <select id="countrySelect" required>
-                        <option value="">-- Land auswählen --</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label>Land *</label>
+                        <select id="countrySelect" required>
+                            <option value="">-- Land auswählen --</option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label>Genauer Ort (optional)</label>
-                    <input type="text" id="locationDetails" placeholder="z.B. Schwarzwald, Nationalpark...">
-                </div>
+                    <div class="form-group">
+                        <label>Genauer Ort (optional)</label>
+                        <input type="text" id="locationDetails" placeholder="z.B. Schwarzwald, Nationalpark...">
+                    </div>
 
-                <div class="form-group">
-                    <label>Notizen (optional)</label>
-                    <textarea id="notes" rows="3" placeholder="Besondere Beobachtungen..."></textarea>
-                </div>
+                    <div class="form-group">
+                        <label>Notizen (optional)</label>
+                        <textarea id="notes" rows="3" placeholder="Besondere Beobachtungen..."></textarea>
+                    </div>
 
-                <button type="submit" class="submit-btn" id="submitBtn">Vogel speichern</button>
-            </form>
-        </div>
+                    <button type="submit" class="submit-btn" id="submitBtn">Vogel speichern</button>
+                </form>
+            </div>
 
-        <!-- Tab: Meine Vögel -->
-        <div class="tab-content" id="list">
-            <div class="backup-section">
-                <h3>💾 Daten sichern & wiederherstellen</h3>
-                <div class="backup-buttons">
-                    <button class="backup-btn export-btn" onclick="exportData()">
-                        📥 Daten exportieren
-                    </button>
-                    <button class="backup-btn import-btn" onclick="document.getElementById('importFile').click()">
-                        📤 Daten importieren
-                    </button>
+            <!-- Tab: Meine Vögel -->
+            <div class="tab-content" id="list">
+                <div class="filter-section">
+                    <h3>🔍 Filtern & Sortieren</h3>
+                    <div class="filter-controls">
+                        <select id="filterCountry" onchange="filterAndSort()">
+                            <option value="">Alle Länder</option>
+                        </select>
+                        <select id="sortBy" onchange="filterAndSort()">
+                            <option value="date">Nach Datum ↓</option>
+                            <option value="date-asc">Nach Datum ↑</option>
+                            <option value="name">Nach Name A-Z</option>
+                            <option value="name-desc">Nach Name Z-A</option>
+                            <option value="country">Nach Land A-Z</option>
+                            <option value="country-desc">Nach Land Z-A</option>
+                        </select>
+                    </div>
                 </div>
-                <input type="file" id="importFile" class="file-import" accept=".json" onchange="importData(event)">
-                <div class="backup-info">
-                    💡 <strong>Tipp:</strong> Exportiere regelmäßig deine Daten und speichere die Datei in deiner Cloud (Google Drive, iCloud, Dropbox). So kannst du sie auf jedem Gerät wiederherstellen!
+                
+                <div class="stats" id="stats"></div>
+                <div class="bird-list" id="birdList"></div>
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-state-icon">🦅</div>
+                    <p>Noch keine Vögel dokumentiert</p>
+                    <p style="font-size: 0.9em;">Füge deinen ersten Vogel hinzu!</p>
                 </div>
             </div>
 
-            <div class="filter-section">
-                <h3>🔍 Filtern & Sortieren</h3>
-                <div class="filter-controls">
-                    <select id="filterCountry" onchange="filterAndSort()">
-                        <option value="">Alle Länder</option>
-                    </select>
-                    <select id="sortBy" onchange="filterAndSort()">
-                        <option value="date">Nach Datum ↓</option>
-                        <option value="date-asc">Nach Datum ↑</option>
-                        <option value="name">Nach Name A-Z</option>
-                        <option value="name-desc">Nach Name Z-A</option>
-                        <option value="country">Nach Land A-Z</option>
-                        <option value="country-desc">Nach Land Z-A</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="stats" id="stats"></div>
-            <div class="bird-list" id="birdList"></div>
-            <div class="empty-state" id="emptyState" style="display: none;">
-                <div class="empty-state-icon">🦅</div>
-                <p>Noch keine Vögel dokumentiert</p>
-                <p style="font-size: 0.9em;">Füge deinen ersten Vogel hinzu!</p>
+            <!-- Tab: Weltkarte -->
+            <div class="tab-content" id="map-tab">
+                <div id="map"></div>
             </div>
         </div>
 
-        <!-- Tab: Weltkarte -->
-        <div class="tab-content" id="map-tab">
-            <div id="map"></div>
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <button class="nav-item active" data-tab="add">
+                <span class="nav-icon">➕</span>
+                <span>Hinzufügen</span>
+            </button>
+            <button class="nav-item" data-tab="list">
+                <span class="nav-icon">📋</span>
+                <span>Meine Vögel</span>
+            </button>
+            <button class="nav-item" data-tab="map">
+                <span class="nav-icon">🗺️</span>
+                <span>Weltkarte</span>
+            </button>
         </div>
-    </div>
-
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <button class="nav-item active" data-tab="add">
-            <span class="nav-icon">➕</span>
-            <span>Hinzufügen</span>
-        </button>
-        <button class="nav-item" data-tab="list">
-            <span class="nav-icon">📋</span>
-            <span>Meine Vögel</span>
-        </button>
-        <button class="nav-item" data-tab="map">
-            <span class="nav-icon">🗺️</span>
-            <span>Weltkarte</span>
-        </button>
     </div>
 
     <!-- Modal -->
@@ -816,21 +821,45 @@
         <div class="success-message">
             <div class="success-icon">✅</div>
             <h3>Erfolgreich gespeichert!</h3>
-            <p>Dein Vogel wurde hinzugefügt</p>
+            <p>Dein Vogel wurde in die Cloud hochgeladen</p>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        let birds = [];
-        let map = null;
-        let filteredBirds = [];
-        let currentPopupBirds = [];
-        let currentPopupIndex = 0;
-        let editingBirdId = null;
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        // Länder mit Koordinaten (Hauptstädte als Mittelpunkt) und Flaggen
-        const countries = {
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtxZpPkWd79a369Q5Ho_51DwBCoJKTazo",
+            authDomain: "voegel-da-hd.firebaseapp.com",
+            projectId: "voegel-da-hd",
+            storageBucket: "voegel-da-hd.firebasestorage.app",
+            messagingSenderId: "169643771453",
+            appId: "1:169643771453:web:64954d303ce59ed8a94c54"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global variables
+        window.currentUser = null;
+        window.birds = [];
+        window.map = null;
+        window.filteredBirds = [];
+        window.currentPopupBirds = [];
+        window.currentPopupIndex = 0;
+        window.editingBirdId = null;
+        window.unsubscribe = null;
+
+        // Countries
+        window.countries = {
             'Deutschland': { coords: [51.1657, 10.4515], flag: '🇩🇪' },
             'Griechenland': { coords: [39.0742, 21.8243], flag: '🇬🇷' },
             'Niederlande': { coords: [52.1326, 5.2913], flag: '🇳🇱' },
@@ -840,594 +869,171 @@
             'Thailand': { coords: [15.8700, 100.9925], flag: '🇹🇭' }
         };
 
-        // Länder-Dropdown füllen
-        function populateCountries() {
-            const select = document.getElementById('countrySelect');
-            Object.keys(countries).sort().forEach(country => {
-                const option = document.createElement('option');
-                option.value = country;
-                option.textContent = `${countries[country].flag} ${country}`;
-                select.appendChild(option);
-            });
-        }
-
-        // Daten laden und speichern
-        function loadBirds() {
-            const stored = localStorage.getItem('birdTracker');
-            if (stored) {
-                birds = JSON.parse(stored);
+        // Auth State Observer
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.currentUser = user;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('userAvatar').src = user.photoURL || '';
+                
+                // Load birds from Firestore
+                loadBirdsFromFirestore();
+                populateCountries();
+                document.getElementById('birdDate').valueAsDate = new Date();
+            } else {
+                window.currentUser = null;
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('mainApp').style.display = 'none';
             }
-        }
-
-        function saveBirds() {
-            localStorage.setItem('birdTracker', JSON.stringify(birds));
-        }
-
-        // Tab-Wechsel
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
-                item.classList.add('active');
-                const tabId = item.dataset.tab === 'map' ? 'map-tab' : item.dataset.tab;
-                document.getElementById(tabId).classList.add('active');
-                
-                if (item.dataset.tab === 'list') {
-                    displayBirds();
-                } else if (item.dataset.tab === 'map') {
-                    setTimeout(() => initMap(), 100);
-                }
-            });
         });
 
-        // Foto-Vorschau mit Komprimierung
-        document.getElementById('photoInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        // Login
+        window.loginWithGoogle = async function() {
+            const provider = new GoogleAuthProvider();
+            try {
+                showSyncStatus('Anmeldung...');
+                await signInWithPopup(auth, provider);
+                
+                // Migrate localStorage data if exists
+                const localData = localStorage.getItem('birdTracker');
+                if (localData) {
+                    const confirm = window.confirm('Lokale Daten gefunden! Möchten Sie diese in die Cloud übertragen?');
+                    if (confirm) {
+                        const localBirds = JSON.parse(localData);
+                        for (const bird of localBirds) {
+                            await addDoc(collection(db, 'birds'), {
+                                ...bird,
+                                userId: auth.currentUser.uid,
+                                createdAt: new Date()
+                            });
+                        }
+                        localStorage.removeItem('birdTracker');
+                        showToast('✅ Lokale Daten übertragen!');
+                    }
+                }
+                hideSyncStatus();
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast('❌ Anmeldung fehlgeschlagen');
+                hideSyncStatus();
+            }
+        };
+
+        // Logout
+        window.logout = async function() {
+            if (confirm('Möchten Sie sich wirklich abmelden?')) {
+                if (window.unsubscribe) window.unsubscribe();
+                await signOut(auth);
+            }
+        };
+
+        // Load birds from Firestore with real-time updates
+        async function loadBirdsFromFirestore() {
+            if (!auth.currentUser) return;
             
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // Bild komprimieren
-                compressImage(e.target.result, (compressedData) => {
-                    const preview = document.getElementById('photoPreview');
-                    preview.src = compressedData;
-                    preview.style.display = 'block';
-                    preview.dataset.compressed = compressedData;
+            showSyncStatus('Lade Vögel...');
+            
+            const q = query(
+                collection(db, 'birds'),
+                where('userId', '==', auth.currentUser.uid)
+            );
+            
+            // Real-time listener
+            window.unsubscribe = onSnapshot(q, (snapshot) => {
+                window.birds = [];
+                snapshot.forEach((doc) => {
+                    window.birds.push({
+                        firestoreId: doc.id,
+                        ...doc.data()
+                    });
                 });
-            };
-            reader.onerror = function() {
-                showToast('❌ Fehler beim Laden des Fotos');
-            };
-            reader.readAsDataURL(file);
-        });
-
-        // Bild-Komprimierungs-Funktion
-        function compressImage(dataUrl, callback) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
                 
-                // Maximale Größe: 1200px
-                let width = img.width;
-                let height = img.height;
-                const maxSize = 1200;
+                // Sort by date
+                window.birds.sort((a, b) => new Date(b.dateRaw) - new Date(a.dateRaw));
                 
-                if (width > height) {
-                    if (width > maxSize) {
-                        height = height * (maxSize / width);
-                        width = maxSize;
-                    }
-                } else {
-                    if (height > maxSize) {
-                        width = width * (maxSize / height);
-                        height = maxSize;
-                    }
-                }
-                
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // Komprimierung: 0.7 = 70% Qualität
-                const compressedData = canvas.toDataURL('image/jpeg', 0.7);
-                callback(compressedData);
-            };
-            img.src = dataUrl;
+                displayBirds();
+                hideSyncStatus();
+            });
         }
 
-        // Kamera öffnen
-        function openCamera() {
-            const input = document.getElementById('photoInput');
-            input.setAttribute('capture', 'environment');
-            input.click();
-        }
-
-        // Galerie öffnen
-        function openGallery() {
-            const input = document.getElementById('photoInput');
-            input.removeAttribute('capture');
-            input.click();
-        }
-
-        // Formular absenden
-        document.getElementById('birdForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Save bird to Firestore
+        window.saveBirdToFirestore = async function(birdData) {
+            if (!auth.currentUser) return;
             
-            // Button deaktivieren
-            const submitBtn = document.getElementById('submitBtn');
-            const isEditing = editingBirdId !== null;
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = isEditing ? 'Wird aktualisiert...' : 'Wird gespeichert...';
-            
-            const name = document.getElementById('birdName').value;
-            const latinName = document.getElementById('latinName').value;
-            const birdDate = document.getElementById('birdDate').value;
-            const country = document.getElementById('countrySelect').value;
-            const locationDetails = document.getElementById('locationDetails').value;
-            const notes = document.getElementById('notes').value;
-            const photoPreview = document.getElementById('photoPreview');
-            
-            // Nutze komprimiertes Bild
-            let photoData = photoPreview.dataset.compressed || photoPreview.src;
-            
-            // Validierung
-            if (!photoData || (!photoData.startsWith('data:image') && !photoData.startsWith('blob:'))) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = isEditing ? 'Änderungen speichern' : 'Vogel speichern';
-                showToast('❌ Bitte Foto auswählen');
-                return;
-            }
+            showSyncStatus('Speichere...');
             
             try {
-                const countryData = countries[country];
-                const location = locationDetails ? `${locationDetails}, ${country}` : country;
-                const dateObj = new Date(birdDate);
-                const formattedDate = dateObj.toLocaleDateString('de-DE');
-                
-                const birdData = {
-                    name: name,
-                    latinName: latinName,
-                    country: country,
-                    countryFlag: countryData.flag,
-                    locationDetails: locationDetails,
-                    location: location,
-                    latitude: countryData.coords[0],
-                    longitude: countryData.coords[1],
-                    notes: notes,
-                    photo: photoData,
-                    date: formattedDate,
-                    dateRaw: birdDate
-                };
-                
-                if (isEditing) {
-                    // BEARBEITEN
-                    const birdIndex = birds.findIndex(b => b.id === editingBirdId);
-                    
-                    if (birdIndex !== -1) {
-                        birds[birdIndex] = {
-                            id: editingBirdId,
-                            ...birdData
-                        };
-                        saveBirds();
-                        
-                        // Reset
-                        editingBirdId = null;
-                        resetForm();
-                        
-                        // Toast zeigen
-                        showToast('✅ Vogel wurde aktualisiert!');
-                        
-                        // Nach 1 Sekunde zur Liste wechseln
-                        setTimeout(() => {
-                            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                            document.querySelector('[data-tab="list"]').classList.add('active');
-                            document.getElementById('list').classList.add('active');
-                            displayBirds();
-                        }, 1000);
-                    } else {
-                        throw new Error('Vogel nicht gefunden');
-                    }
-                } else {
-                    // NEU HINZUFÜGEN
-                    const bird = {
-                        id: Date.now(),
-                        ...birdData
-                    };
-                    
-                    birds.unshift(bird);
-                    saveBirds();
-                    
-                    resetForm();
-                    showSuccessMessage();
-                }
-                
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Vogel speichern';
-                
+                const docRef = await addDoc(collection(db, 'birds'), {
+                    ...birdData,
+                    userId: auth.currentUser.uid,
+                    createdAt: new Date()
+                });
+                hideSyncStatus();
+                return docRef.id;
             } catch (error) {
-                console.error('Fehler:', error);
-                showToast('❌ Fehler beim Speichern: ' + error.message);
-                submitBtn.disabled = false;
-                submitBtn.textContent = isEditing ? 'Änderungen speichern' : 'Vogel speichern';
+                console.error('Error saving:', error);
+                showToast('❌ Speichern fehlgeschlagen');
+                hideSyncStatus();
+                throw error;
             }
-        });
+        };
 
-        // Formular zurücksetzen
-        function resetForm() {
-            document.getElementById('birdForm').reset();
-            document.getElementById('photoPreview').style.display = 'none';
-            document.getElementById('photoPreview').dataset.compressed = '';
-            document.getElementById('birdDate').valueAsDate = new Date();
-            document.getElementById('submitBtn').textContent = 'Vogel speichern';
-            editingBirdId = null;
+        // Update bird in Firestore
+        window.updateBirdInFirestore = async function(firestoreId, birdData) {
+            if (!auth.currentUser) return;
+            
+            showSyncStatus('Aktualisiere...');
+            
+            try {
+                await updateDoc(doc(db, 'birds', firestoreId), {
+                    ...birdData,
+                    updatedAt: new Date()
+                });
+                hideSyncStatus();
+            } catch (error) {
+                console.error('Error updating:', error);
+                showToast('❌ Aktualisierung fehlgeschlagen');
+                hideSyncStatus();
+                throw error;
+            }
+        };
+
+        // Delete bird from Firestore
+        window.deleteBirdFromFirestore = async function(firestoreId) {
+            if (!auth.currentUser) return;
+            
+            showSyncStatus('Lösche...');
+            
+            try {
+                await deleteDoc(doc(db, 'birds', firestoreId));
+                hideSyncStatus();
+            } catch (error) {
+                console.error('Error deleting:', error);
+                showToast('❌ Löschen fehlgeschlagen');
+                hideSyncStatus();
+                throw error;
+            }
+        };
+
+        // Sync status
+        function showSyncStatus(message) {
+            const status = document.getElementById('syncStatus');
+            status.querySelector('span').textContent = message;
+            status.classList.add('show');
         }
 
-        // Erfolgsmeldung anzeigen
-        function showSuccessMessage() {
-            const overlay = document.getElementById('successOverlay');
-            overlay.classList.add('show');
-            
+        function hideSyncStatus() {
             setTimeout(() => {
-                overlay.classList.remove('show');
-            }, 2000);
+                document.getElementById('syncStatus').classList.remove('show');
+            }, 500);
         }
 
-        // App neu laden
-        function refreshApp() {
-            location.reload();
-        }
-
-        // Vögel anzeigen mit Filter und Sortierung
-        function displayBirds() {
-            filterAndSort();
-        }
-
-        function filterAndSort() {
-            const list = document.getElementById('birdList');
-            const stats = document.getElementById('stats');
-            const empty = document.getElementById('emptyState');
-            
-            if (birds.length === 0) {
-                list.innerHTML = '';
-                stats.innerHTML = '';
-                empty.style.display = 'block';
-                return;
-            }
-            
-            empty.style.display = 'none';
-            
-            // Filter nach Land
-            const filterCountry = document.getElementById('filterCountry').value;
-            filteredBirds = filterCountry ? birds.filter(b => b.country === filterCountry) : [...birds];
-            
-            // Sortierung
-            const sortBy = document.getElementById('sortBy').value;
-            filteredBirds.sort((a, b) => {
-                switch(sortBy) {
-                    case 'date':
-                        return new Date(b.dateRaw) - new Date(a.dateRaw);
-                    case 'date-asc':
-                        return new Date(a.dateRaw) - new Date(b.dateRaw);
-                    case 'name':
-                        return a.name.localeCompare(b.name);
-                    case 'name-desc':
-                        return b.name.localeCompare(a.name);
-                    case 'country':
-                        return a.country.localeCompare(b.country);
-                    case 'country-desc':
-                        return b.country.localeCompare(a.country);
-                    default:
-                        return 0;
-                }
-            });
-            
-            // Statistiken
-            const countriesVisited = [...new Set(birds.map(b => b.country))];
-            stats.innerHTML = `
-                <div class="stat-card">
-                    <h3>${filteredBirds.length}</h3>
-                    <p>${filterCountry ? 'Gefiltert' : 'Vögel'}</p>
-                </div>
-                <div class="stat-card">
-                    <h3>${countriesVisited.length}</h3>
-                    <p>Länder</p>
-                </div>
-                <div class="stat-card">
-                    <h3>${birds.length}</h3>
-                    <p>Gesamt</p>
-                </div>
-            `;
-            
-            // Vögel-Grid
-            list.innerHTML = filteredBirds.map(bird => `
-                <div class="bird-card">
-                    <img src="${bird.photo}" alt="${bird.name}">
-                    <div class="bird-info">
-                        <h3>${bird.name}</h3>
-                        ${bird.latinName ? `<p style="font-style: italic; color: #888;">${bird.latinName}</p>` : ''}
-                        <p><span class="country-flag">${bird.countryFlag}</span>${bird.location}</p>
-                        <p>📅 ${bird.date}</p>
-                        <div class="bird-actions">
-                            <button class="btn-small btn-view" onclick="showBirdDetails(${bird.id})">Details</button>
-                            <button class="btn-small btn-edit" onclick="editBird(${bird.id})">Bearbeiten</button>
-                            <button class="btn-small btn-delete" onclick="deleteBird(${bird.id})">Löschen</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            
-            // Länder-Filter aktualisieren
-            updateCountryFilter();
-        }
-
-        function updateCountryFilter() {
-            const filterSelect = document.getElementById('filterCountry');
-            const currentValue = filterSelect.value;
-            const countries = [...new Set(birds.map(b => b.country))].sort();
-            
-            filterSelect.innerHTML = '<option value="">Alle Länder</option>' + 
-                countries.map(country => {
-                    const bird = birds.find(b => b.country === country);
-                    return `<option value="${country}">${bird.countryFlag} ${country}</option>`;
-                }).join('');
-            
-            filterSelect.value = currentValue;
-        }
-
-        function showBirdDetails(id) {
-            const bird = birds.find(b => b.id === id);
-            document.getElementById('modalTitle').textContent = bird.name;
-            document.getElementById('modalBody').innerHTML = `
-                <img src="${bird.photo}" class="modal-image" alt="${bird.name}">
-                <div class="modal-info">
-                    ${bird.latinName ? `<p><strong>Lateinischer Name:</strong> <em>${bird.latinName}</em></p>` : ''}
-                    <p><strong>Land:</strong> <span class="country-flag">${bird.countryFlag}</span>${bird.country}</p>
-                    ${bird.locationDetails ? `<p><strong>Genauer Ort:</strong> ${bird.locationDetails}</p>` : ''}
-                    <p><strong>Datum:</strong> ${bird.date}</p>
-                    ${bird.notes ? `<p><strong>Notizen:</strong> ${bird.notes}</p>` : ''}
-                </div>
-            `;
-            document.getElementById('birdModal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('birdModal').classList.remove('active');
-        }
-
-        function deleteBird(id) {
-            if (confirm('Vogel wirklich löschen?')) {
-                birds = birds.filter(b => b.id !== id);
-                saveBirds();
-                displayBirds();
-                showToast('Vogel gelöscht');
-            }
-        }
-
-        function editBird(id) {
-            const bird = birds.find(b => b.id === id);
-            if (!bird) return;
-            
-            // Wechsle zum Hinzufügen-Tab
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector('[data-tab="add"]').classList.add('active');
-            document.getElementById('add').classList.add('active');
-            
-            // Fülle Formular mit Vogel-Daten
-            editingBirdId = bird.id;
-            document.getElementById('birdName').value = bird.name;
-            document.getElementById('latinName').value = bird.latinName || '';
-            document.getElementById('birdDate').value = bird.dateRaw;
-            document.getElementById('countrySelect').value = bird.country;
-            document.getElementById('locationDetails').value = bird.locationDetails || '';
-            document.getElementById('notes').value = bird.notes || '';
-            
-            // Zeige Foto
-            const preview = document.getElementById('photoPreview');
-            preview.src = bird.photo;
-            preview.dataset.compressed = bird.photo;
-            preview.style.display = 'block';
-            
-            // Ändere Button-Text
-            document.getElementById('submitBtn').textContent = 'Änderungen speichern';
-            
-            // Scrolle nach oben
-            window.scrollTo(0, 0);
-            
-            showToast('📝 Bearbeite: ' + bird.name);
-        }
-
-        function initMap() {
-            if (map) {
-                map.remove();
-            }
-            
-            map = L.map('map').setView([30, 0], 2);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-            
-            // Gruppiere Vögel nach Koordinaten
-            const locationGroups = {};
-            birds.forEach(bird => {
-                const key = `${bird.latitude},${bird.longitude}`;
-                if (!locationGroups[key]) {
-                    locationGroups[key] = [];
-                }
-                locationGroups[key].push(bird);
-            });
-            
-            // Erstelle Marker für jede Gruppe
-            Object.entries(locationGroups).forEach(([key, birdsAtLocation]) => {
-                const [lat, lng] = key.split(',').map(Number);
-                const count = birdsAtLocation.length;
-                
-                // Custom Icon mit Zahl
-                const icon = L.divIcon({
-                    className: 'custom-marker',
-                    html: `<div class="marker-cluster" style="width: ${30 + count * 5}px; height: ${30 + count * 5}px; font-size: ${12 + count}px;">${count}</div>`,
-                    iconSize: [30 + count * 5, 30 + count * 5]
-                });
-                
-                const marker = L.marker([lat, lng], { icon: icon }).addTo(map);
-                
-                // Popup mit Navigation
-                marker.on('click', () => {
-                    currentPopupBirds = birdsAtLocation;
-                    currentPopupIndex = 0;
-                    showPopupContent(marker);
-                });
-            });
-            
-            if (birds.length > 0) {
-                const group = L.featureGroup(
-                    Object.keys(locationGroups).map(key => {
-                        const [lat, lng] = key.split(',').map(Number);
-                        return L.marker([lat, lng]);
-                    })
-                );
-                map.fitBounds(group.getBounds().pad(0.1));
-            }
-        }
-
-        function showPopupContent(marker) {
-            const bird = currentPopupBirds[currentPopupIndex];
-            const totalCount = currentPopupBirds.length;
-            
-            const popupContent = `
-                <div style="text-align: center; min-width: 200px;">
-                    <img src="${bird.photo}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;">
-                    <strong style="display: block; margin-bottom: 5px; font-size: 1.1em;">${bird.name}</strong>
-                    ${bird.latinName ? `<em style="display: block; font-size: 0.85em; color: #888; margin-bottom: 5px;">${bird.latinName}</em>` : ''}
-                    <span style="font-size: 1.2em;">${bird.countryFlag}</span> ${bird.country}<br>
-                    <small style="color: #666;">${bird.date}</small>
-                    ${totalCount > 1 ? `
-                        <div class="popup-navigation">
-                            <button class="popup-nav-btn" onclick="navigatePopup(-1)" ${currentPopupIndex === 0 ? 'disabled' : ''}>◀ Zurück</button>
-                            <span class="popup-counter">${currentPopupIndex + 1} / ${totalCount}</span>
-                            <button class="popup-nav-btn" onclick="navigatePopup(1)" ${currentPopupIndex === totalCount - 1 ? 'disabled' : ''}>Weiter ▶</button>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-            
-            marker.bindPopup(popupContent, { maxWidth: 250 }).openPopup();
-        }
-
-        function navigatePopup(direction) {
-            currentPopupIndex += direction;
-            currentPopupIndex = Math.max(0, Math.min(currentPopupIndex, currentPopupBirds.length - 1));
-            
-            // Finde den aktiven Marker und aktualisiere Popup
-            map.eachLayer((layer) => {
-                if (layer instanceof L.Marker && layer.getPopup() && layer.getPopup().isOpen()) {
-                    showPopupContent(layer);
-                }
-            });
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-
-        // Export-Funktion
-        function exportData() {
-            if (birds.length === 0) {
-                showToast('⚠️ Keine Daten zum Exportieren');
-                return;
-            }
-
-            const dataStr = JSON.stringify(birds, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            
-            const date = new Date().toISOString().split('T')[0];
-            link.download = `vogel-tracker-backup-${date}.json`;
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            showToast(`✅ ${birds.length} Vögel exportiert!`);
-        }
-
-        // Import-Funktion
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const importedBirds = JSON.parse(e.target.result);
-                    
-                    if (!Array.isArray(importedBirds)) {
-                        showToast('❌ Ungültige Datei');
-                        return;
-                    }
-
-                    const validBirds = importedBirds.filter(bird => 
-                        bird.name && bird.country && bird.photo
-                    );
-
-                    if (validBirds.length === 0) {
-                        showToast('❌ Keine gültigen Daten gefunden');
-                        return;
-                    }
-
-                    // Frage ob Daten ersetzt oder hinzugefügt werden sollen
-                    if (birds.length > 0) {
-                        const replace = confirm(
-                            `Du hast bereits ${birds.length} Vögel gespeichert.\n\n` +
-                            `Möchtest du sie ERSETZEN (OK) oder HINZUFÜGEN (Abbrechen)?\n\n` +
-                            `Importierte Vögel: ${validBirds.length}`
-                        );
-
-                        if (replace) {
-                            birds = validBirds;
-                        } else {
-                            // Füge nur neue Vögel hinzu (keine Duplikate nach ID)
-                            const existingIds = new Set(birds.map(b => b.id));
-                            const newBirds = validBirds.filter(b => !existingIds.has(b.id));
-                            birds = [...birds, ...newBirds];
-                        }
-                    } else {
-                        birds = validBirds;
-                    }
-
-                    saveBirds();
-                    displayBirds();
-                    showToast(`✅ ${validBirds.length} Vögel importiert!`);
-                    
-                } catch (error) {
-                    showToast('❌ Fehler beim Importieren');
-                    console.error('Import error:', error);
-                }
-            };
-            
-            reader.readAsText(file);
-            event.target.value = '';
-        }
-
-        // Initial laden
-        populateCountries();
-        loadBirds();
-        displayBirds();
-        
-        // Heutiges Datum als Standard setzen
-        document.getElementById('birdDate').valueAsDate = new Date();
+        // Make Firebase functions available globally
+        window.db = db;
+        window.auth = auth;
     </script>
+
+    <script src="app.js"></script>
 </body>
 </html>
