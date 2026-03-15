@@ -253,12 +253,14 @@ function filterAndSort() {
     
     list.innerHTML = window.filteredBirds.map(bird => `
         <div class="bird-card">
-            <img src="${bird.photo}" alt="${bird.name}">
-            <div class="bird-info">
-                <h3>${bird.name}</h3>
-                ${bird.latinName ? `<p style="font-style: italic; color: #888;">${bird.latinName}</p>` : ''}
-                <p><span class="country-flag">${bird.countryFlag}</span>${bird.location}</p>
-                <p>📅 ${bird.date}</p>
+            <div class="bird-main">
+                <img src="${bird.photo}" alt="${bird.name}">
+                <div class="bird-info">
+                    <h3>${bird.name}</h3>
+                    ${bird.latinName ? `<p style="font-style: italic; color: #888;">${bird.latinName}</p>` : ''}
+                    <p><span class="country-flag">${bird.countryFlag}</span>${bird.location}</p>
+                    <p>📅 ${bird.date}</p>
+                </div>
             </div>
             <div class="bird-actions">
                 <button class="btn-small btn-view" onclick="showBirdDetails(${bird.id})">Details</button>
