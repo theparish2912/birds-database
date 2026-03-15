@@ -394,7 +394,7 @@
         }
 
         .photo-option-btn {
-            padding: 40px 20px;
+            padding: 30px 20px;
             border: 2px solid #667eea;
             border-radius: 12px;
             background: white;
@@ -414,17 +414,77 @@
             background: #f0f4ff;
         }
 
+        .photo-option-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
         .photo-input {
             display: none;
         }
 
-        .photo-preview {
+        .photo-previews-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .photo-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+        }
+
+        .photo-preview-item img {
             width: 100%;
-            max-height: 300px;
+            height: 100%;
             object-fit: cover;
-            border-radius: 12px;
-            margin-top: 15px;
-            display: none;
+            border-radius: 10px;
+            display: block;
+        }
+
+        .photo-remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-counter {
+            text-align: center;
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 8px;
+        }
+
+        .modal-photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .modal-photo-gallery img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .modal-photo-gallery img:first-child:only-child {
+            grid-column: 1 / -1;
+            aspect-ratio: 16/9;
         }
 
         .submit-btn {
@@ -469,7 +529,7 @@
             padding: 15px;
         }
 
-        .bird-card img {
+        .bird-card > img {
             width: 100px;
             height: 100px;
             object-fit: cover;
@@ -980,19 +1040,20 @@
             <div class="tab-content active" id="add">
                 <form id="birdForm">
                     <div class="form-group">
-                        <label>Foto hinzufügen *</label>
+                        <label>Fotos hinzufügen * <span style="font-weight:400; color:#888;">(max. 5)</span></label>
                         <div class="photo-options">
-                            <button type="button" class="photo-option-btn" onclick="openCamera()">
+                            <button type="button" class="photo-option-btn" id="cameraBtn" onclick="openCamera()">
                                 <span style="font-size: 2.5em;">📸</span>
                                 <span>Foto aufnehmen</span>
                             </button>
-                            <button type="button" class="photo-option-btn" onclick="openGallery()">
+                            <button type="button" class="photo-option-btn" id="galleryBtn" onclick="openGallery()">
                                 <span style="font-size: 2.5em;">🖼️</span>
                                 <span>Galerie</span>
                             </button>
                         </div>
-                        <input type="file" id="photoInput" class="photo-input" accept="image/*,.heic,.heif" required>
-                        <img id="photoPreview" class="photo-preview">
+                        <input type="file" id="photoInput" class="photo-input" accept="image/*,.heic,.heif">
+                        <div class="photo-previews-grid" id="photoPreviewsGrid"></div>
+                        <p class="photo-counter" id="photoCounter" style="display:none;"></p>
                     </div>
 
                     <div class="form-group">
