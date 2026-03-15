@@ -729,17 +729,9 @@
         }
 
         @keyframes successPop {
-            0% {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .success-icon {
@@ -833,6 +825,46 @@
             color: #666;
             font-weight: 600;
         }
+
+        /* Team Switcher */
+        .team-switcher {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .team-switcher p {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .team-switch-btn {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .team-switch-btn:hover {
+            background: #f0f4ff;
+        }
+
+        .team-switch-code {
+            opacity: 0.6;
+            font-size: 0.85em;
+            font-weight: 400;
+        }
     </style>
 </head>
 <body>
@@ -911,6 +943,12 @@
                         <h3>Mitglieder (<span id="memberCount">0</span>)</h3>
                         <div id="membersList"></div>
                         <button class="leave-team-btn" onclick="leaveTeam()">Team verlassen</button>
+                    </div>
+
+                    <!-- Team Switcher -->
+                    <div id="teamSwitcher" style="display: none;" class="team-switcher">
+                        <p>🔀 Zu anderem Team wechseln:</p>
+                        <div id="teamSwitcherList"></div>
                     </div>
                 </div>
             </div>
@@ -1400,19 +1438,23 @@
 
         window.openTeamModal = async function() {
             document.getElementById('teamModal').classList.add('active');
-            
+
+            // Alle Teams des Users laden
+            const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+            const userTeams = userDoc.exists() ? (userDoc.data().teams || []) : [];
+
             if (window.currentTeam) {
                 document.getElementById('teamOptions').style.display = 'none';
                 document.getElementById('createTeamForm').classList.remove('active');
                 document.getElementById('joinTeamForm').classList.remove('active');
                 document.getElementById('currentTeamInfo').style.display = 'block';
-                
+
                 document.getElementById('currentTeamName').textContent = window.currentTeam.name;
                 document.getElementById('currentTeamCodeDisplay').textContent = window.currentTeam.code;
-                
+
                 const teamDoc = await getDoc(doc(db, 'teams', window.currentTeam.code));
                 const members = teamDoc.data().members;
-                
+
                 document.getElementById('memberCount').textContent = members.length;
                 document.getElementById('membersList').innerHTML = members.map(m => `
                     <div class="member-item">
@@ -1422,11 +1464,68 @@
                         </div>
                     </div>
                 `).join('');
+
+                // Team-Wechsel anzeigen falls mehrere Teams vorhanden
+                const switchContainer = document.getElementById('teamSwitcher');
+                const switchList = document.getElementById('teamSwitcherList');
+
+                if (userTeams.length > 1) {
+                    const otherTeamCodes = userTeams.filter(t => t !== window.currentTeam.code);
+
+                    // Namen aller anderen Teams aus Firestore laden
+                    const otherTeamDocs = await Promise.all(
+                        otherTeamCodes.map(code => getDoc(doc(db, 'teams', code)))
+                    );
+
+                    switchList.innerHTML = otherTeamDocs.map(otherDoc => {
+                        if (!otherDoc.exists()) return '';
+                        const data = otherDoc.data();
+                        return `
+                            <button class="team-switch-btn" onclick="window.switchTeam('${data.code}')">
+                                <span>${data.name}</span>
+                                <span class="team-switch-code">${data.code}</span>
+                            </button>
+                        `;
+                    }).join('');
+
+                    switchContainer.style.display = 'block';
+                } else {
+                    switchContainer.style.display = 'none';
+                }
+
             } else {
                 document.getElementById('teamOptions').style.display = 'grid';
                 document.getElementById('createTeamForm').classList.remove('active');
                 document.getElementById('joinTeamForm').classList.remove('active');
                 document.getElementById('currentTeamInfo').style.display = 'none';
+            }
+        };
+
+        window.switchTeam = async function(teamCode) {
+            try {
+                showSyncStatus('Wechsle Team...');
+                const teamDoc = await getDoc(doc(db, 'teams', teamCode));
+                if (!teamDoc.exists()) {
+                    showToast('❌ Team nicht gefunden');
+                    hideSyncStatus();
+                    return;
+                }
+
+                await setDoc(doc(db, 'users', auth.currentUser.uid), {
+                    currentTeam: teamCode
+                }, { merge: true });
+
+                window.currentTeam = { code: teamCode, ...teamDoc.data() };
+                updateTeamDisplay();
+                loadBirdsFromFirestore();
+
+                showToast(`✅ Gewechselt zu: ${teamDoc.data().name}`);
+                closeTeamModal();
+                hideSyncStatus();
+            } catch (error) {
+                console.error('Error switching team:', error);
+                showToast('❌ Fehler beim Wechseln');
+                hideSyncStatus();
             }
         };
 
