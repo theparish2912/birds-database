@@ -971,7 +971,7 @@
                 <div class="team-info" onclick="openTeamModal()" id="teamInfo">
                     <span id="teamDisplay">👤 Persönlich</span>
                 </div>
-                <button class="team-btn" onclick="openTeamModal()">Team verwalten</button>
+                <button class="team-btn" onclick="openTeamOptions()">+ Team</button>
             </div>
         </div>
 
@@ -1436,10 +1436,10 @@
             }
         };
 
+        // Zeigt Team-Info + Switcher (beim Klick auf den aktuellen Team-Namen)
         window.openTeamModal = async function() {
             document.getElementById('teamModal').classList.add('active');
 
-            // Alle Teams des Users laden
             const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
             const userTeams = userDoc.exists() ? (userDoc.data().teams || []) : [];
 
@@ -1454,7 +1454,6 @@
 
                 const teamDoc = await getDoc(doc(db, 'teams', window.currentTeam.code));
                 const members = teamDoc.data().members;
-
                 document.getElementById('memberCount').textContent = members.length;
                 document.getElementById('membersList').innerHTML = members.map(m => `
                     <div class="member-item">
@@ -1464,46 +1463,80 @@
                         </div>
                     </div>
                 `).join('');
-
-                // Team-Wechsel anzeigen falls mehrere Teams vorhanden
-                const switchContainer = document.getElementById('teamSwitcher');
-                const switchList = document.getElementById('teamSwitcherList');
-
-                if (userTeams.length > 1) {
-                    const otherTeamCodes = userTeams.filter(t => t !== window.currentTeam.code);
-
-                    // Namen aller anderen Teams aus Firestore laden
-                    const otherTeamDocs = await Promise.all(
-                        otherTeamCodes.map(code => getDoc(doc(db, 'teams', code)))
-                    );
-
-                    switchList.innerHTML = otherTeamDocs.map(otherDoc => {
-                        if (!otherDoc.exists()) return '';
-                        const data = otherDoc.data();
-                        return `
-                            <button class="team-switch-btn" onclick="window.switchTeam('${data.code}')">
-                                <span>${data.name}</span>
-                                <span class="team-switch-code">${data.code}</span>
-                            </button>
-                        `;
-                    }).join('');
-
-                    switchContainer.style.display = 'block';
-                } else {
-                    switchContainer.style.display = 'none';
-                }
-
             } else {
-                document.getElementById('teamOptions').style.display = 'grid';
+                document.getElementById('teamOptions').style.display = 'none';
                 document.getElementById('createTeamForm').classList.remove('active');
                 document.getElementById('joinTeamForm').classList.remove('active');
                 document.getElementById('currentTeamInfo').style.display = 'none';
             }
+
+            // Switcher immer aufbauen
+            const switchContainer = document.getElementById('teamSwitcher');
+            const switchList = document.getElementById('teamSwitcherList');
+            const otherTeamCodes = userTeams.filter(t => t !== (window.currentTeam?.code || null));
+            const rows = [];
+
+            // "Persönlich" anbieten falls gerade in einem Team
+            if (window.currentTeam) {
+                rows.push(`
+                    <button class="team-switch-btn" onclick="window.switchTeam(null)">
+                        <span>👤 Persönlich</span>
+                        <span class="team-switch-code">kein Team</span>
+                    </button>
+                `);
+            }
+
+            // Andere Teams laden und anzeigen
+            if (otherTeamCodes.length > 0) {
+                const otherTeamDocs = await Promise.all(
+                    otherTeamCodes.map(code => getDoc(doc(db, 'teams', code)))
+                );
+                otherTeamDocs.forEach(otherDoc => {
+                    if (!otherDoc.exists()) return;
+                    const data = otherDoc.data();
+                    rows.push(`
+                        <button class="team-switch-btn" onclick="window.switchTeam('${data.code}')">
+                            <span>${data.name}</span>
+                            <span class="team-switch-code">${data.code}</span>
+                        </button>
+                    `);
+                });
+            }
+
+            if (rows.length > 0) {
+                switchList.innerHTML = rows.join('');
+                switchContainer.style.display = 'block';
+            } else {
+                switchContainer.style.display = 'none';
+            }
+        };
+
+        // Zeigt immer die vollen Optionen (beim Klick auf "+ Team")
+        window.openTeamOptions = function() {
+            document.getElementById('teamModal').classList.add('active');
+            document.getElementById('currentTeamInfo').style.display = 'none';
+            document.getElementById('createTeamForm').classList.remove('active');
+            document.getElementById('joinTeamForm').classList.remove('active');
+            document.getElementById('teamOptions').style.display = 'grid';
         };
 
         window.switchTeam = async function(teamCode) {
             try {
-                showSyncStatus('Wechsle Team...');
+                showSyncStatus('Wechsle...');
+
+                if (teamCode === null) {
+                    await setDoc(doc(db, 'users', auth.currentUser.uid), {
+                        currentTeam: null
+                    }, { merge: true });
+                    window.currentTeam = null;
+                    updateTeamDisplay();
+                    loadBirdsFromFirestore();
+                    showToast('✅ Persönlicher Modus aktiv');
+                    closeTeamModal();
+                    hideSyncStatus();
+                    return;
+                }
+
                 const teamDoc = await getDoc(doc(db, 'teams', teamCode));
                 if (!teamDoc.exists()) {
                     showToast('❌ Team nicht gefunden');
