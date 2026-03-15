@@ -294,17 +294,19 @@ function filterAndSort() {
         const photoCount = bird.photos ? bird.photos.length : 1;
         return `
         <div class="bird-card">
-            <img src="${bird.photo}" alt="${bird.name}">
-            <div class="bird-info">
-                <h3>${bird.name}</h3>
-                ${bird.latinName ? `<p style="font-style: italic; color: #888;">${bird.latinName}</p>` : ''}
-                <p><span class="country-flag">${bird.countryFlag}</span>${bird.location}</p>
-                <p>📅 ${bird.date}${photoCount > 1 ? ` &nbsp;📷 ${photoCount}` : ''}</p>
-                <div class="bird-actions">
-                    <button class="btn-small btn-view" onclick="showBirdDetails(${bird.id})">Details</button>
-                    <button class="btn-small btn-edit" onclick="editBird(${bird.id})">Bearbeiten</button>
-                    <button class="btn-small btn-delete" onclick="deleteBird(${bird.id})">Löschen</button>
+            <div class="bird-card-top">
+                <img src="${bird.photo}" alt="${bird.name}">
+                <div class="bird-info">
+                    <h3>${bird.name}</h3>
+                    ${bird.latinName ? `<p style="font-style: italic; color: #888;">${bird.latinName}</p>` : ''}
+                    <p><span class="country-flag">${bird.countryFlag}</span>${bird.location}</p>
+                    <p>📅 ${bird.date}${photoCount > 1 ? ` &nbsp;📷 ${photoCount}` : ''}</p>
                 </div>
+            </div>
+            <div class="bird-actions">
+                <button class="btn-small btn-view" onclick="showBirdDetails(${bird.id})">Details</button>
+                <button class="btn-small btn-edit" onclick="editBird(${bird.id})">Bearbeiten</button>
+                <button class="btn-small btn-delete" onclick="deleteBird(${bird.id})">Löschen</button>
             </div>
         </div>
     `}).join('');
