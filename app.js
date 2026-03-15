@@ -1,3 +1,6 @@
+// Gespeicherte Fotos für den aktuellen Eintrag
+window.currentPhotos = []; // Array von base64-Strings
+
 // Länder-Dropdown füllen
 function populateCountries() {
     const select = document.getElementById('countrySelect');
@@ -27,25 +30,64 @@ document.querySelectorAll('.nav-item').forEach(item => {
     });
 });
 
-// Foto-Vorschau mit Komprimierung
+// Foto-Input: neues Foto hinzufügen
 document.getElementById('photoInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
-    
+
+    if (window.currentPhotos.length >= 5) {
+        showToast('❌ Maximal 5 Fotos erlaubt');
+        this.value = '';
+        return;
+    }
+
     const reader = new FileReader();
     reader.onload = function(e) {
         compressImage(e.target.result, (compressedData) => {
-            const preview = document.getElementById('photoPreview');
-            preview.src = compressedData;
-            preview.style.display = 'block';
-            preview.dataset.compressed = compressedData;
+            window.currentPhotos.push(compressedData);
+            renderPhotoPreviews();
         });
     };
     reader.onerror = function() {
         showToast('❌ Fehler beim Laden des Fotos');
     };
     reader.readAsDataURL(file);
+    this.value = ''; // Reset damit dasselbe Bild nochmal gewählt werden kann
 });
+
+// Vorschau-Grid rendern
+function renderPhotoPreviews() {
+    const grid = document.getElementById('photoPreviewsGrid');
+    const counter = document.getElementById('photoCounter');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const galleryBtn = document.getElementById('galleryBtn');
+    const count = window.currentPhotos.length;
+
+    grid.innerHTML = window.currentPhotos.map((src, index) => `
+        <div class="photo-preview-item">
+            <img src="${src}" alt="Foto ${index + 1}">
+            <button type="button" class="photo-remove-btn" onclick="removePhoto(${index})">×</button>
+        </div>
+    `).join('');
+
+    if (count > 0) {
+        counter.textContent = `${count} / 5 Foto${count > 1 ? 's' : ''} hinzugefügt`;
+        counter.style.display = 'block';
+    } else {
+        counter.style.display = 'none';
+    }
+
+    // Buttons deaktivieren wenn Maximum erreicht
+    const disabled = count >= 5;
+    cameraBtn.disabled = disabled;
+    galleryBtn.disabled = disabled;
+}
+
+// Foto entfernen
+function removePhoto(index) {
+    window.currentPhotos.splice(index, 1);
+    renderPhotoPreviews();
+}
 
 // Bild-Komprimierung
 function compressImage(dataUrl, callback) {
@@ -56,7 +98,7 @@ function compressImage(dataUrl, callback) {
         
         let width = img.width;
         let height = img.height;
-        const maxSize = 800; // Reduziert von 1200 für Cloud
+        const maxSize = 800;
         
         if (width > height) {
             if (width > maxSize) {
@@ -74,8 +116,7 @@ function compressImage(dataUrl, callback) {
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
         
-        const compressedData = canvas.toDataURL('image/jpeg', 0.6);
-        callback(compressedData);
+        callback(canvas.toDataURL('image/jpeg', 0.6));
     };
     img.src = dataUrl;
 }
@@ -100,6 +141,11 @@ document.getElementById('birdForm').addEventListener('submit', async function(e)
     const submitBtn = document.getElementById('submitBtn');
     const isEditing = window.editingBirdId !== null;
     
+    if (window.currentPhotos.length === 0) {
+        showToast('❌ Bitte mindestens ein Foto hinzufügen');
+        return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = isEditing ? 'Wird aktualisiert...' : 'Wird gespeichert...';
     
@@ -109,16 +155,6 @@ document.getElementById('birdForm').addEventListener('submit', async function(e)
     const country = document.getElementById('countrySelect').value;
     const locationDetails = document.getElementById('locationDetails').value;
     const notes = document.getElementById('notes').value;
-    const photoPreview = document.getElementById('photoPreview');
-    
-    let photoData = photoPreview.dataset.compressed || photoPreview.src;
-    
-    if (!photoData || (!photoData.startsWith('data:image') && !photoData.startsWith('blob:'))) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = isEditing ? 'Änderungen speichern' : 'Vogel speichern';
-        showToast('❌ Bitte Foto auswählen');
-        return;
-    }
     
     try {
         const countryData = window.countries[country];
@@ -136,13 +172,14 @@ document.getElementById('birdForm').addEventListener('submit', async function(e)
             latitude: countryData.coords[0],
             longitude: countryData.coords[1],
             notes: notes,
-            photo: photoData,
+            // Erstes Foto als Hauptfoto, alle Fotos im Array
+            photo: window.currentPhotos[0],
+            photos: window.currentPhotos,
             date: formattedDate,
             dateRaw: birdDate
         };
         
         if (isEditing) {
-            // Update existing bird
             const bird = window.birds.find(b => b.id === window.editingBirdId);
             if (bird && bird.firestoreId) {
                 await window.updateBirdInFirestore(bird.firestoreId, birdData);
@@ -158,7 +195,6 @@ document.getElementById('birdForm').addEventListener('submit', async function(e)
                 document.getElementById('list').classList.add('active');
             }, 1000);
         } else {
-            // Add new bird
             birdData.id = Date.now();
             await window.saveBirdToFirestore(birdData);
             resetForm();
@@ -179,8 +215,8 @@ document.getElementById('birdForm').addEventListener('submit', async function(e)
 // Form reset
 function resetForm() {
     document.getElementById('birdForm').reset();
-    document.getElementById('photoPreview').style.display = 'none';
-    document.getElementById('photoPreview').dataset.compressed = '';
+    window.currentPhotos = [];
+    renderPhotoPreviews();
     document.getElementById('birdDate').valueAsDate = new Date();
     document.getElementById('submitBtn').textContent = 'Vogel speichern';
     window.editingBirdId = null;
@@ -213,11 +249,14 @@ function filterAndSort() {
     empty.style.display = 'none';
     
     const filterCountry = document.getElementById('filterCountry').value;
-    window.filteredBirds = filterCountry ? window.birds.filter(b => b.country === filterCountry) : [...window.birds];
-    
     const sortBy = document.getElementById('sortBy').value;
+    
+    window.filteredBirds = window.birds.filter(bird => {
+        return !filterCountry || bird.country === filterCountry;
+    });
+    
     window.filteredBirds.sort((a, b) => {
-        switch(sortBy) {
+        switch (sortBy) {
             case 'date':
                 return new Date(b.dateRaw) - new Date(a.dateRaw);
             case 'date-asc':
@@ -251,24 +290,24 @@ function filterAndSort() {
         </div>
     `;
     
-    list.innerHTML = window.filteredBirds.map(bird => `
+    list.innerHTML = window.filteredBirds.map(bird => {
+        const photoCount = bird.photos ? bird.photos.length : 1;
+        return `
         <div class="bird-card">
-            <div class="bird-main">
-                <img src="${bird.photo}" alt="${bird.name}">
-                <div class="bird-info">
-                    <h3>${bird.name}</h3>
-                    ${bird.latinName ? `<p style="font-style: italic; color: #888;">${bird.latinName}</p>` : ''}
-                    <p><span class="country-flag">${bird.countryFlag}</span>${bird.location}</p>
-                    <p>📅 ${bird.date}</p>
+            <img src="${bird.photo}" alt="${bird.name}">
+            <div class="bird-info">
+                <h3>${bird.name}</h3>
+                ${bird.latinName ? `<p style="font-style: italic; color: #888;">${bird.latinName}</p>` : ''}
+                <p><span class="country-flag">${bird.countryFlag}</span>${bird.location}</p>
+                <p>📅 ${bird.date}${photoCount > 1 ? ` &nbsp;📷 ${photoCount}` : ''}</p>
+                <div class="bird-actions">
+                    <button class="btn-small btn-view" onclick="showBirdDetails(${bird.id})">Details</button>
+                    <button class="btn-small btn-edit" onclick="editBird(${bird.id})">Bearbeiten</button>
+                    <button class="btn-small btn-delete" onclick="deleteBird(${bird.id})">Löschen</button>
                 </div>
             </div>
-            <div class="bird-actions">
-                <button class="btn-small btn-view" onclick="showBirdDetails(${bird.id})">Details</button>
-                <button class="btn-small btn-edit" onclick="editBird(${bird.id})">Bearbeiten</button>
-                <button class="btn-small btn-delete" onclick="deleteBird(${bird.id})">Löschen</button>
-            </div>
         </div>
-    `).join('');
+    `}).join('');
     
     updateCountryFilter();
 }
@@ -287,12 +326,22 @@ function updateCountryFilter() {
     filterSelect.value = currentValue;
 }
 
-// Show bird details
+// Vogel-Details anzeigen
 function showBirdDetails(id) {
     const bird = window.birds.find(b => b.id === id);
+    const photos = bird.photos && bird.photos.length > 0 ? bird.photos : [bird.photo];
+
+    const galleryHtml = `
+        <div class="modal-photo-gallery">
+            ${photos.map((src, i) => `
+                <img src="${src}" alt="${bird.name} Foto ${i + 1}" onclick="openFullPhoto('${src}')">
+            `).join('')}
+        </div>
+    `;
+
     document.getElementById('modalTitle').textContent = bird.name;
     document.getElementById('modalBody').innerHTML = `
-        <img src="${bird.photo}" class="modal-image" alt="${bird.name}">
+        ${galleryHtml}
         <div class="modal-info">
             ${bird.latinName ? `<p><strong>Lateinischer Name:</strong> <em>${bird.latinName}</em></p>` : ''}
             <p><strong>Land:</strong> <span class="country-flag">${bird.countryFlag}</span>${bird.country}</p>
@@ -304,11 +353,20 @@ function showBirdDetails(id) {
     document.getElementById('birdModal').classList.add('active');
 }
 
+// Foto in voller Grösse öffnen
+function openFullPhoto(src) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = `<img src="${src}" style="max-width:100%;max-height:100%;border-radius:8px;object-fit:contain;">`;
+    overlay.addEventListener('click', () => document.body.removeChild(overlay));
+    document.body.appendChild(overlay);
+}
+
 function closeModal() {
     document.getElementById('birdModal').classList.remove('active');
 }
 
-// Delete bird
+// Vogel löschen
 async function deleteBird(id) {
     if (confirm('Vogel wirklich löschen?')) {
         const bird = window.birds.find(b => b.id === id);
@@ -319,7 +377,7 @@ async function deleteBird(id) {
     }
 }
 
-// Edit bird
+// Vogel bearbeiten
 function editBird(id) {
     const bird = window.birds.find(b => b.id === id);
     if (!bird) return;
@@ -337,17 +395,16 @@ function editBird(id) {
     document.getElementById('locationDetails').value = bird.locationDetails || '';
     document.getElementById('notes').value = bird.notes || '';
     
-    const preview = document.getElementById('photoPreview');
-    preview.src = bird.photo;
-    preview.dataset.compressed = bird.photo;
-    preview.style.display = 'block';
+    // Fotos laden: neues Format (photos-Array) oder altes Format (photo)
+    window.currentPhotos = bird.photos && bird.photos.length > 0 ? [...bird.photos] : [bird.photo];
+    renderPhotoPreviews();
     
     document.getElementById('submitBtn').textContent = 'Änderungen speichern';
     window.scrollTo(0, 0);
     showToast('📝 Bearbeite: ' + bird.name);
 }
 
-// Map
+// Karte
 function initMap() {
     if (window.map) {
         window.map.remove();
@@ -362,9 +419,7 @@ function initMap() {
     const locationGroups = {};
     window.birds.forEach(bird => {
         const key = `${bird.latitude},${bird.longitude}`;
-        if (!locationGroups[key]) {
-            locationGroups[key] = [];
-        }
+        if (!locationGroups[key]) locationGroups[key] = [];
         locationGroups[key].push(bird);
     });
     
@@ -379,7 +434,6 @@ function initMap() {
         });
         
         const marker = L.marker([lat, lng], { icon: icon }).addTo(window.map);
-        
         marker.on('click', () => {
             window.currentPopupBirds = birdsAtLocation;
             window.currentPopupIndex = 0;
