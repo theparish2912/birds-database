@@ -259,11 +259,13 @@ function filterAndSort() {
                 ${bird.latinName ? `<p style="font-style: italic; color: #888;">${bird.latinName}</p>` : ''}
                 <p><span class="country-flag">${bird.countryFlag}</span>${bird.location}</p>
                 <p>📅 ${bird.date}</p>
+                <p>
                 <div class="bird-actions">
                     <button class="btn-small btn-view" onclick="showBirdDetails(${bird.id})">Details</button>
                     <button class="btn-small btn-edit" onclick="editBird(${bird.id})">Bearbeiten</button>
                     <button class="btn-small btn-delete" onclick="deleteBird(${bird.id})">Löschen</button>
                 </div>
+                </p>
             </div>
         </div>
     `).join('');
