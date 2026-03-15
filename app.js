@@ -149,7 +149,7 @@ document.getElementById('birdForm').addEventListener('submit', async function(e)
     submitBtn.disabled = true;
     submitBtn.textContent = isEditing ? 'Wird aktualisiert...' : 'Wird gespeichert...';
     
-    const name = document.getElementById('birdName').value;
+    const name = document.getElementById('birdName').value || 'Unbekannter Vogel';
     const latinName = document.getElementById('latinName').value;
     const birdDate = document.getElementById('birdDate').value;
     const country = document.getElementById('countrySelect').value;
